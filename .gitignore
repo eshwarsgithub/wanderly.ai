@@ -1,0 +1,13 @@
+# Dependencies
+wanderlytrip-ai/node_modules/
+
+# Next.js build output
+wanderlytrip-ai/.next/
+
+# Env files — never commit secrets
+wanderlytrip-ai/.env.local
+wanderlytrip-ai/.env*.local
+
+# OS
+.DS_Store
+Thumbs.db

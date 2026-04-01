@@ -1,0 +1,39 @@
+import { NextRequest, NextResponse } from "next/server";
+import { ChatAnthropic } from "@langchain/anthropic";
+import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+
+export async function GET(req: NextRequest) {
+  const destination = req.nextUrl.searchParams.get("destination");
+
+  if (!destination) {
+    return NextResponse.json({ error: "destination is required" }, { status: 400 });
+  }
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({ error: "ANTHROPIC_API_KEY not configured" }, { status: 500 });
+  }
+
+  const model = new ChatAnthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    model: "claude-haiku-4-5-20251001", // Use Haiku for speed on this simpler task
+    maxTokens: 2000,
+    temperature: 0.7,
+  });
+
+  const response = await model.invoke([
+    new SystemMessage(
+      `You are a food critic and travel expert. Return ONLY valid JSON — an array of 6 restaurant recommendations. Each object must have: name, cuisine, priceRange ($|$$|$$$|$$$$), rating (1-5 integer), neighborhood, mustTry, vibe, tip.`
+    ),
+    new HumanMessage(`Give me the 6 best restaurants in ${destination}. Return raw JSON array only, no markdown.`),
+  ]);
+
+  try {
+    const content = response.content as string;
+    const jsonMatch = content.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error("No JSON array found");
+    const restaurants = JSON.parse(jsonMatch[0]);
+    return NextResponse.json(restaurants);
+  } catch {
+    return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 });
+  }
+}
