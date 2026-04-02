@@ -3,16 +3,11 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import type { ItineraryDay } from "@/lib/ai-agent";
+import { getImageUrl } from "@/lib/images";
 
 interface MoodBoardProps {
   day: ItineraryDay;
   destination: string;
-}
-
-// Generate Unsplash source URLs based on activity image queries
-function getImageUrl(query: string, seed: number): string {
-  const encodedQuery = encodeURIComponent(query);
-  return `https://source.unsplash.com/400x300/?${encodedQuery}&sig=${seed}`;
 }
 
 export default function MoodBoard({ day, destination }: MoodBoardProps) {

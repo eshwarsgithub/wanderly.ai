@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { motion } from "framer-motion";
-import { Building2, Star, MapPin, Search, DollarSign } from "lucide-react";
+import { Building2, Star, MapPin, Search, DollarSign, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
@@ -19,6 +19,29 @@ async function searchHotelsAction(params: {
   );
   if (!res.ok) return [];
   return res.json();
+}
+
+function bookingUrl(hotelName: string, city: string, checkIn: string, checkOut: string): string {
+  const query = encodeURIComponent(`${hotelName} ${city}`);
+  return `https://www.booking.com/search.html?ss=${query}&checkin=${checkIn}&checkout=${checkOut}`;
+}
+
+function HotelSkeleton() {
+  return (
+    <div className="glass rounded-2xl p-5 animate-pulse">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex-1 space-y-2">
+          <div className="h-4 w-3/4 bg-white/10 rounded" />
+          <div className="h-3 w-1/3 bg-white/10 rounded" />
+        </div>
+        <div className="h-6 w-16 bg-white/10 rounded" />
+      </div>
+      <div className="h-3 w-1/2 bg-white/10 rounded mb-4" />
+      <div className="h-3 w-full bg-white/10 rounded mb-1" />
+      <div className="h-3 w-2/3 bg-white/10 rounded mb-4" />
+      <div className="h-9 w-full bg-white/10 rounded-xl" />
+    </div>
+  );
 }
 
 export default function HotelsPage() {
@@ -85,57 +108,73 @@ export default function HotelsPage() {
           </motion.button>
         </form>
 
-        {searched && hotels.length === 0 && (
+        {/* Skeletons */}
+        {isPending && (
+          <div className="grid sm:grid-cols-2 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => <HotelSkeleton key={i} />)}
+          </div>
+        )}
+
+        {!isPending && searched && hotels.length === 0 && (
           <div className="text-center py-12 text-white/40">
             <Building2 className="w-10 h-10 mx-auto mb-3 opacity-30" />
             <p>No hotels found. Check your city code and Amadeus API keys in .env.local</p>
           </div>
         )}
 
-        <div className="grid sm:grid-cols-2 gap-4">
-          {hotels.map((hotel, i) => {
-            const offer = hotel.offers[0];
-            return (
-              <motion.div key={hotel.hotel.hotelId} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
-                className="glass rounded-2xl p-5 hover:border-[#00f5d4]/20 transition-colors">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="text-white font-semibold">{hotel.hotel.name}</h3>
-                    <div className="flex items-center gap-1 mt-1">
-                      {Array.from({ length: Number(hotel.hotel.rating) || 3 }).map((_, i) => (
-                        <Star key={i} className="w-3 h-3 text-[#fbbf24] fill-current" />
-                      ))}
+        {!isPending && (
+          <div className="grid sm:grid-cols-2 gap-4">
+            {hotels.map((hotel, i) => {
+              const offer = hotel.offers[0];
+              const city = hotel.hotel.address?.cityName ?? "";
+              return (
+                <motion.div key={hotel.hotel.hotelId} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08 }}
+                  className="glass rounded-2xl p-5 hover:border-[#00f5d4]/20 transition-colors">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="text-white font-semibold">{hotel.hotel.name}</h3>
+                      <div className="flex items-center gap-1 mt-1">
+                        {Array.from({ length: Number(hotel.hotel.rating) || 3 }).map((_, j) => (
+                          <Star key={j} className="w-3 h-3 text-[#fbbf24] fill-current" />
+                        ))}
+                      </div>
                     </div>
+                    {offer && (
+                      <div className="text-right">
+                        <div className="flex items-center gap-1 text-[#00f5d4] font-bold text-lg">
+                          <DollarSign className="w-4 h-4" />
+                          {offer.price.total}
+                        </div>
+                        <p className="text-white/30 text-xs">per stay</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-white/40 text-xs mb-4">
+                    <MapPin className="w-3 h-3" />
+                    <span>{city}, {hotel.hotel.address?.countryCode}</span>
                   </div>
                   {offer && (
-                    <div className="text-right">
-                      <div className="flex items-center gap-1 text-[#00f5d4] font-bold text-lg">
-                        <DollarSign className="w-4 h-4" />
-                        {offer.price.total}
-                      </div>
-                      <p className="text-white/30 text-xs">per stay</p>
+                    <div className="text-white/50 text-xs mb-4 line-clamp-2">
+                      {offer.room?.description?.text}
                     </div>
                   )}
-                </div>
-                <div className="flex items-center gap-1.5 text-white/40 text-xs mb-4">
-                  <MapPin className="w-3 h-3" />
-                  <span>{hotel.hotel.address?.cityName}, {hotel.hotel.address?.countryCode}</span>
-                </div>
-                {offer && (
-                  <div className="text-white/50 text-xs mb-4 line-clamp-2">
-                    {offer.room?.description?.text}
-                  </div>
-                )}
-                <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                  className="w-full py-2.5 rounded-xl text-sm font-semibold text-[#0a0a0a]"
-                  style={{ background: "linear-gradient(135deg, #00f5d4, #00c4aa)" }}>
-                  Book Now
-                </motion.button>
-              </motion.div>
-            );
-          })}
-        </div>
+                  <motion.a
+                    href={bookingUrl(hotel.hotel.name, city, form.checkIn, form.checkOut)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="w-full py-2.5 rounded-xl text-sm font-semibold text-[#0a0a0a] flex items-center justify-center gap-1.5"
+                    style={{ background: "linear-gradient(135deg, #00f5d4, #00c4aa)" }}
+                  >
+                    Book on Booking.com <ArrowRight className="w-3.5 h-3.5" />
+                  </motion.a>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </main>
   );

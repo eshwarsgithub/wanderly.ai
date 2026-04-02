@@ -21,6 +21,33 @@ async function searchFlightsAction(params: {
   return res.json();
 }
 
+function skyscannerUrl(origin: string, destination: string, date: string): string {
+  // Format: YYMMDD
+  const d = date.replace(/-/g, "").slice(2);
+  return `https://www.skyscanner.com/transport/flights/${origin.toLowerCase()}/${destination.toLowerCase()}/${d}/`;
+}
+
+function FlightSkeleton() {
+  return (
+    <div className="glass rounded-2xl p-5 animate-pulse">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-6">
+          <div className="h-6 w-12 bg-white/10 rounded" />
+          <div className="flex flex-col items-center gap-1">
+            <div className="h-3 w-20 bg-white/10 rounded" />
+            <div className="h-px w-24 bg-white/10" />
+          </div>
+          <div className="h-6 w-12 bg-white/10 rounded" />
+        </div>
+        <div className="flex flex-col items-end gap-2">
+          <div className="h-6 w-16 bg-white/10 rounded" />
+          <div className="h-7 w-20 bg-white/10 rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function FlightsPage() {
   const [isPending, startTransition] = useTransition();
   const [flights, setFlights] = useState<FlightOffer[]>([]);
@@ -87,58 +114,79 @@ export default function FlightsPage() {
           </motion.button>
         </form>
 
-        {/* Results */}
-        {searched && flights.length === 0 && (
+        {/* Skeletons while loading */}
+        {isPending && (
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, i) => <FlightSkeleton key={i} />)}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!isPending && searched && flights.length === 0 && (
           <div className="text-center py-12 text-white/40">
             <Plane className="w-10 h-10 mx-auto mb-3 opacity-30" />
             <p>No flights found. Check your IATA codes and Amadeus API keys in .env.local</p>
           </div>
         )}
 
-        <div className="space-y-4">
-          {flights.map((flight, i) => {
-            const seg = flight.itineraries[0]?.segments[0];
-            return (
-              <motion.div key={flight.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }} className="glass rounded-2xl p-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-6">
-                    <div className="text-center">
-                      <p className="text-white font-bold text-lg">{seg?.departure.iataCode}</p>
-                      <p className="text-white/40 text-xs">{seg?.departure.at?.split("T")[1]?.slice(0, 5)}</p>
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="flex items-center gap-2 text-white/40 text-xs">
-                        <Clock className="w-3 h-3" />
-                        {flight.itineraries[0]?.duration?.replace("PT", "").toLowerCase()}
+        {/* Results */}
+        {!isPending && (
+          <div className="space-y-4">
+            {flights.map((flight, i) => {
+              const seg = flight.itineraries[0]?.segments[0];
+              const bookUrl = skyscannerUrl(
+                seg?.departure.iataCode ?? form.origin,
+                seg?.arrival.iataCode ?? form.destination,
+                seg?.departure.at?.split("T")[0] ?? form.date
+              );
+              return (
+                <motion.div key={flight.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08 }} className="glass rounded-2xl p-5">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-6">
+                      <div className="text-center">
+                        <p className="text-white font-bold text-lg">{seg?.departure.iataCode}</p>
+                        <p className="text-white/40 text-xs">{seg?.departure.at?.split("T")[1]?.slice(0, 5)}</p>
                       </div>
-                      <div className="w-24 h-px bg-gradient-to-r from-[#00f5d4]/30 via-[#00f5d4] to-[#00f5d4]/30 relative">
-                        <Plane className="w-3 h-3 text-[#00f5d4] absolute -top-1.5 left-1/2 -translate-x-1/2" />
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="flex items-center gap-2 text-white/40 text-xs">
+                          <Clock className="w-3 h-3" />
+                          {flight.itineraries[0]?.duration?.replace("PT", "").toLowerCase()}
+                        </div>
+                        <div className="w-24 h-px bg-gradient-to-r from-[#00f5d4]/30 via-[#00f5d4] to-[#00f5d4]/30 relative">
+                          <Plane className="w-3 h-3 text-[#00f5d4] absolute -top-1.5 left-1/2 -translate-x-1/2" />
+                        </div>
+                        <p className="text-white/30 text-xs">{seg?.carrierCode}{seg?.number}</p>
                       </div>
-                      <p className="text-white/30 text-xs">{seg?.carrierCode}{seg?.number}</p>
+                      <div className="text-center">
+                        <p className="text-white font-bold text-lg">{seg?.arrival.iataCode}</p>
+                        <p className="text-white/40 text-xs">{seg?.arrival.at?.split("T")[1]?.slice(0, 5)}</p>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <p className="text-white font-bold text-lg">{seg?.arrival.iataCode}</p>
-                      <p className="text-white/40 text-xs">{seg?.arrival.at?.split("T")[1]?.slice(0, 5)}</p>
+                    <div className="text-right">
+                      <p className="text-[#00f5d4] font-bold text-xl">${flight.price.total}</p>
+                      <div className="flex items-center gap-1 text-white/40 text-xs justify-end mt-1">
+                        <Users className="w-3 h-3" />
+                        {flight.numberOfBookableSeats} seats left
+                      </div>
+                      <motion.a
+                        href={bookUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ scale: 1.04 }}
+                        whileTap={{ scale: 0.96 }}
+                        className="mt-2 inline-flex items-center gap-1 text-xs text-[#0a0a0a] px-3 py-1.5 rounded-lg font-medium"
+                        style={{ background: "linear-gradient(135deg, #00f5d4, #00c4aa)" }}
+                      >
+                        Book on Skyscanner <ArrowRight className="w-3 h-3" />
+                      </motion.a>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[#00f5d4] font-bold text-xl">${flight.price.total}</p>
-                    <div className="flex items-center gap-1 text-white/40 text-xs justify-end mt-1">
-                      <Users className="w-3 h-3" />
-                      {flight.numberOfBookableSeats} seats left
-                    </div>
-                    <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                      className="mt-2 flex items-center gap-1 text-xs text-[#0a0a0a] px-3 py-1.5 rounded-lg font-medium"
-                      style={{ background: "linear-gradient(135deg, #00f5d4, #00c4aa)" }}>
-                      Book <ArrowRight className="w-3 h-3" />
-                    </motion.button>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </main>
   );

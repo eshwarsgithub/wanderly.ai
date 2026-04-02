@@ -2,29 +2,34 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { Globe, MapPin, Calendar, Users, DollarSign, Star, Package, Plane, ArrowLeft } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Globe, MapPin, Calendar, Users, DollarSign, Star, Package, Plane, ArrowLeft, BookmarkPlus, Check, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import InteractiveTimeline from "@/components/InteractiveTimeline";
 import MoodBoard from "@/components/MoodBoard";
 import BudgetTracker from "@/components/BudgetTracker";
 import AIChatAssistant from "@/components/AIChatAssistant";
+import TripMap from "@/components/TripMap";
 import Navbar from "@/components/Navbar";
 import type { GeneratedItinerary } from "@/lib/ai-agent";
+import { saveTrip, getUser } from "@/lib/supabase";
+
+type SaveState = "idle" | "saving" | "saved" | "error";
 
 export default function TripDashboard() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [itinerary, setItinerary] = useState<GeneratedItinerary | null>(null);
   const [activeTab, setActiveTab] = useState<"timeline" | "moodboard" | "packing">("timeline");
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     const stored = sessionStorage.getItem(`trip-${id}`);
     if (stored) {
       setItinerary(JSON.parse(stored));
     } else {
-      // Could load from Supabase here
       router.push("/generate");
     }
   }, [id, router]);
@@ -32,6 +37,45 @@ export default function TripDashboard() {
   function handleItineraryUpdate(updated: GeneratedItinerary) {
     setItinerary(updated);
     sessionStorage.setItem(`trip-${id}`, JSON.stringify(updated));
+    // If previously saved, re-save silently
+    if (saveState === "saved") {
+      persistTrip(updated);
+    }
+  }
+
+  async function persistTrip(data: GeneratedItinerary) {
+    const user = await getUser();
+    if (!user) return;
+    await saveTrip({
+      id: id as string,
+      user_id: user.id,
+      destination: data.destination,
+      vibe: data.vibe,
+      budget: data.totalBudget,
+      travelers: 1,
+      start_date: data.days[0]?.date ?? "",
+      end_date: data.days[data.days.length - 1]?.date ?? "",
+      itinerary: data,
+    });
+  }
+
+  async function handleSaveTrip() {
+    if (!itinerary || saveState === "saving" || saveState === "saved") return;
+    setSaveState("saving");
+    setSaveError("");
+    try {
+      const user = await getUser();
+      if (!user) {
+        router.push("/auth/login");
+        return;
+      }
+      await persistTrip(itinerary);
+      setSaveState("saved");
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Failed to save");
+      setSaveState("error");
+      setTimeout(() => setSaveState("idle"), 4000);
+    }
   }
 
   if (!itinerary) {
@@ -55,9 +99,32 @@ export default function TripDashboard() {
     { id: "packing", label: "Packing & Tips" },
   ] as const;
 
+  const saveLabel = saveState === "saving" ? "Saving…" : saveState === "saved" ? "Saved!" : "Save Trip";
+  const SaveIcon = saveState === "saved" ? Check : BookmarkPlus;
+
   return (
     <main className="min-h-screen bg-[#0a0a0a]">
       <Navbar />
+
+      {/* Save toast */}
+      <AnimatePresence>
+        {(saveState === "saved" || saveState === "error") && (
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-medium shadow-xl"
+            style={{
+              background: saveState === "saved" ? "linear-gradient(135deg,#00f5d4,#00c4aa)" : "#ef4444",
+              color: saveState === "saved" ? "#0a0a0a" : "#fff",
+            }}
+          >
+            {saveState === "saved"
+              ? <><Check className="w-4 h-4" /> Trip saved to your collection!</>
+              : <><AlertCircle className="w-4 h-4" /> {saveError || "Could not save trip"}</>}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hero banner */}
       <div className="relative pt-16 overflow-hidden">
@@ -72,14 +139,36 @@ export default function TripDashboard() {
             New trip
           </Link>
 
-          {/* Title */}
+          {/* Title row */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex items-center gap-3 mb-3">
-              <Globe className="w-6 h-6 text-[#00f5d4]" />
-              <Badge className="bg-[#00f5d4]/20 text-[#00f5d4] border-[#00f5d4]/30 capitalize">
-                {itinerary.vibe}
-              </Badge>
+            <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
+              <div className="flex items-center gap-3">
+                <Globe className="w-6 h-6 text-[#00f5d4]" />
+                <Badge className="bg-[#00f5d4]/20 text-[#00f5d4] border-[#00f5d4]/30 capitalize">
+                  {itinerary.vibe}
+                </Badge>
+              </div>
+
+              {/* Save Trip button */}
+              <motion.button
+                whileHover={{ scale: saveState === "saved" ? 1 : 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={handleSaveTrip}
+                disabled={saveState === "saving" || saveState === "saved"}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-70 transition-all"
+                style={{
+                  background: saveState === "saved"
+                    ? "rgba(0,245,212,0.15)"
+                    : "linear-gradient(135deg, #00f5d4, #00c4aa)",
+                  color: saveState === "saved" ? "#00f5d4" : "#0a0a0a",
+                  border: saveState === "saved" ? "1px solid rgba(0,245,212,0.3)" : "none",
+                }}
+              >
+                <SaveIcon className="w-4 h-4" />
+                {saveLabel}
+              </motion.button>
             </div>
+
             <h1 className="text-4xl sm:text-6xl font-bold text-white mb-4">
               {itinerary.destination}
             </h1>
@@ -203,15 +292,19 @@ export default function TripDashboard() {
             )}
           </div>
 
-          {/* Sidebar — quick actions */}
+          {/* Sidebar */}
           <div className="hidden lg:block space-y-4">
+            {/* Google Map — shown on Timeline tab */}
+            {activeTab === "timeline" && (
+              <TripMap destination={itinerary.destination} days={itinerary.days} />
+            )}
+
             <div className="glass rounded-2xl p-5">
               <h3 className="text-white font-semibold mb-4 text-sm">Quick Actions</h3>
               <div className="space-y-2">
                 {[
                   { label: "Search Flights", href: "/flights", icon: Plane },
                   { label: "Find Hotels", href: "/hotels", icon: MapPin },
-                  { label: "Save This Trip", href: "/saved", icon: Star },
                 ].map(({ label, href, icon: Icon }) => (
                   <Link key={label} href={href}>
                     <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer">
