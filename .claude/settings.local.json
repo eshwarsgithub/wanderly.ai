@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest wanderlytrip-ai --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --yes)",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn@latest init --defaults -y)",
+      "Bash(npx shadcn@latest add card input label select tabs dialog sheet badge slider)",
+      "Bash(npm run:*)",
+      "Bash(claude mcp:*)",
+      "Bash(npx skills:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
