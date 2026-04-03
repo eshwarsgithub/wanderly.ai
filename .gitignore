@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+wanderlytrip-ai/node_modules/
+
+# Environment
+.env.local
+.env*.local
+wanderlytrip-ai/.env.local
+wanderlytrip-ai/.env*.local
+
+# Next.js build output
+.next/
+wanderlytrip-ai/.next/
+out/
+wanderlytrip-ai/out/
+
+# PWA service worker (generated)
+wanderlytrip-ai/public/sw.js
+wanderlytrip-ai/public/workbox-*.js
+wanderlytrip-ai/public/worker-*.js
+wanderlytrip-ai/public/fallback-*.js
+wanderlytrip-ai/public/swe-worker-*.js
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.log
+npm-debug.log*

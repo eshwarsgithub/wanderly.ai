@@ -1,0 +1,218 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* shadcn required mappings */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-heading);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* WanderlyTrip brand tokens */
+  --color-teal: #00f5d4;
+  --color-teal-dim: #00c4aa;
+  --color-teal-dark: #007a6a;
+  --color-dark-base: #0a0a0a;
+  --color-dark-card: #111111;
+  --color-dark-border: rgba(0, 245, 212, 0.15);
+
+  /* Custom animations */
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
+}
+
+/* WanderlyTrip dark theme — always dark */
+:root {
+  --background: #0a0a0a;
+  --foreground: #f0fffe;
+  --card: #111111;
+  --card-foreground: #f0fffe;
+  --popover: #111111;
+  --popover-foreground: #f0fffe;
+  --primary: #00f5d4;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #f0fffe;
+  --muted: #1a1a1a;
+  --muted-foreground: #6b7280;
+  --accent: #1a1a1a;
+  --accent-foreground: #00f5d4;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: rgba(0, 245, 212, 0.12);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #00f5d4;
+  --chart-1: #00f5d4;
+  --chart-2: #00c4aa;
+  --chart-3: #007a6a;
+  --chart-4: #004d43;
+  --chart-5: #001a17;
+  --radius: 0.75rem;
+  --sidebar: #111111;
+  --sidebar-foreground: #f0fffe;
+  --sidebar-primary: #00f5d4;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #1a1a1a;
+  --sidebar-accent-foreground: #00f5d4;
+  --sidebar-border: rgba(0, 245, 212, 0.12);
+  --sidebar-ring: #00f5d4;
+}
+
+/* Base layer */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    @apply font-sans;
+  }
+
+  body {
+    background-color: #0a0a0a;
+    color: #f0fffe;
+    @apply antialiased;
+  }
+
+  ::selection {
+    background-color: rgba(0, 245, 212, 0.25);
+    color: #00f5d4;
+  }
+}
+
+/* Glassmorphism utility */
+@layer utilities {
+  .glass {
+    background: rgba(17, 17, 17, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 245, 212, 0.12);
+  }
+
+  .glass-light {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .teal-glow {
+    box-shadow: 0 0 20px rgba(0, 245, 212, 0.3), 0 0 60px rgba(0, 245, 212, 0.1);
+  }
+
+  .teal-glow-sm {
+    box-shadow: 0 0 10px rgba(0, 245, 212, 0.2);
+  }
+
+  .teal-text-glow {
+    text-shadow: 0 0 30px rgba(0, 245, 212, 0.5);
+  }
+
+  .gradient-teal {
+    background: linear-gradient(135deg, #00f5d4 0%, #00c4aa 50%, #007a6a 100%);
+  }
+
+  .gradient-dark-teal {
+    background: linear-gradient(135deg, rgba(0, 245, 212, 0.1) 0%, transparent 100%);
+  }
+
+  .cinematic-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(10, 10, 10, 0.4) 0%,
+      rgba(10, 10, 10, 0.2) 40%,
+      rgba(10, 10, 10, 0.6) 80%,
+      rgba(10, 10, 10, 1) 100%
+    );
+  }
+
+  .mountain-gradient {
+    background: linear-gradient(
+      135deg,
+      #0a0a0a 0%,
+      #0d1a18 25%,
+      #0a2420 50%,
+      #0d1a18 75%,
+      #0a0a0a 100%
+    );
+  }
+
+  .shimmer-border {
+    background: linear-gradient(
+      90deg,
+      rgba(0, 245, 212, 0) 0%,
+      rgba(0, 245, 212, 0.4) 50%,
+      rgba(0, 245, 212, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+}
+
+/* Keyframes */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; box-shadow: 0 0 20px rgba(0, 245, 212, 0.3); }
+  50% { opacity: 1; box-shadow: 0 0 40px rgba(0, 245, 212, 0.6); }
+}
+
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: rgba(0, 245, 212, 0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 245, 212, 0.5); }
