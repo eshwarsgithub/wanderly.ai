@@ -44,11 +44,16 @@ export default function TripMap({ destination, days }: TripMapProps) {
   const [pins, setPins] = useState<PinData[]>([]);
   const [selectedPin, setSelectedPin] = useState<PinData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 35.6762, lng: 139.6503 });
 
   useEffect(() => {
     if (!apiKey) { setLoading(false); return; }
 
     async function loadPins() {
+      // Geocode the destination itself first for an accurate map center
+      const destCoords = await geocodeAddress(destination);
+      if (destCoords) setMapCenter(destCoords);
+
       const allActivities: Array<{ activity: Activity; day: number }> = [];
       for (const day of days) {
         for (const activity of day.activities) {
@@ -97,7 +102,7 @@ export default function TripMap({ destination, days }: TripMapProps) {
       <APIProvider apiKey={apiKey}>
         <Map
           style={{ width: "100%", height: "320px" }}
-          defaultCenter={{ lat: 35.6762, lng: 139.6503 }} // fallback: Tokyo
+          defaultCenter={mapCenter}
           defaultZoom={12}
           mapId="wanderly-trip-map"
           colorScheme="DARK"

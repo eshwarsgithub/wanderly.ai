@@ -7,68 +7,75 @@ import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function CTASection() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section ref={ref} className="relative py-32 px-4 overflow-hidden">
-      {/* Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full opacity-15 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse, #00f5d4, transparent 70%)" }}
-      />
-
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.8 }}
-        className="max-w-3xl mx-auto text-center relative z-10"
-      >
+    <section className="py-24 px-4" ref={ref}>
+      <div className="max-w-5xl mx-auto">
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={isInView ? { scale: 1, opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="glass rounded-3xl p-12 teal-glow"
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="relative rounded-3xl bg-[#0f172a] px-8 py-20 sm:px-16 sm:py-24 overflow-hidden text-center"
         >
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <Sparkles className="w-5 h-5 text-[#00f5d4]" />
-            <span className="text-[#00f5d4] text-sm font-medium uppercase tracking-widest">
-              Ready to wander?
-            </span>
+          {/* Subtle dot grid */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
+            }}
+          />
+
+          <div className="relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/8 border border-white/12 text-white/50 text-xs font-medium mb-10 tracking-wide uppercase"
+            >
+              <Sparkles className="w-3 h-3 text-[#14b8a6]" />
+              Free forever · No credit card
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 12 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.05] mb-5"
+            >
+              Your dream trip is
+              <br />
+              <span className="text-white/60">minutes away</span>
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={inView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.6, delay: 0.25 }}
+              className="text-white/40 text-lg max-w-md mx-auto mb-12 leading-relaxed"
+            >
+              Join thousands planning smarter with AI. Personalised, fast, completely free.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-3"
+            >
+              <Link href="/generate">
+                <button className="btn btn-lg group relative overflow-hidden bg-white text-[#0f172a] hover:bg-slate-50 shadow-[0_2px_8px_rgba(0,0,0,0.15)]">
+                  Start Planning Now
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              </Link>
+            </motion.div>
+
+            <p className="text-white/20 text-xs mt-6 tracking-wide">Takes 30 seconds · Powered by Claude AI</p>
           </div>
-
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 leading-tight">
-            Your dream trip is{" "}
-            <span
-              style={{
-                background: "linear-gradient(135deg, #00f5d4, #00c4aa)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              minutes away.
-            </span>
-          </h2>
-
-          <p className="text-white/50 text-lg mb-10 max-w-xl mx-auto">
-            Join thousands of travelers who plan smarter, explore deeper, and spend less time
-            — all thanks to AI.
-          </p>
-
-          <Link href="/generate">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              className="group inline-flex items-center gap-3 px-10 py-5 rounded-2xl font-bold text-xl text-[#0a0a0a]"
-              style={{ background: "linear-gradient(135deg, #00f5d4, #00c4aa)" }}
-            >
-              <span>Start Planning — It&apos;s Free</span>
-              <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-            </motion.button>
-          </Link>
-
-          <p className="text-white/30 text-sm mt-6">No credit card required · Powered by Claude AI</p>
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 }

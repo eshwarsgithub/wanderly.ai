@@ -2,130 +2,129 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Zap, Map, DollarSign, MessageCircle, Plane, Heart } from "lucide-react";
+import { Zap, Map, DollarSign, MessageCircle, Plane, Heart, ArrowRight } from "lucide-react";
 
 const FEATURES = [
   {
     icon: Zap,
-    title: "AI-Powered in Seconds",
-    description:
-      "Claude AI crafts your complete itinerary — activities, timings, local tips — tailored to your exact vibe and budget.",
-    color: "#00f5d4",
+    label: "AI Trip Planning",
+    desc: "Claude AI generates a complete, personalised itinerary in under 30 seconds. Day-by-day activities, timing, and costs — all tailored to your vibe.",
+    span: "lg:col-span-2",
+    accent: "#0ea5e9",
+    large: true,
   },
   {
     icon: Map,
-    title: "Interactive Map Timeline",
-    description:
-      "Visualize your entire trip on a live Google Map. Drag & drop days, see routes, explore neighborhoods.",
-    color: "#a78bfa",
+    label: "Interactive Map",
+    desc: "Every activity pinned on a live map. Visualise your journey geographically.",
+    span: "lg:col-span-1",
+    accent: "#8b5cf6",
+    large: false,
   },
   {
     icon: DollarSign,
-    title: "Real-Time Budget Tracker",
-    description:
-      "Every activity, hotel, and flight tracked live. Know exactly where your money goes before you even leave home.",
-    color: "#fbbf24",
+    label: "Budget Tracker",
+    desc: "Real-time cost breakdown per day. Never go over budget.",
+    span: "lg:col-span-1",
+    accent: "#14b8a6",
+    large: false,
   },
   {
     icon: MessageCircle,
-    title: "AI Chat Refinement",
-    description:
-      'Not feeling Day 2? Just say "make it more foodie" and watch your trip transform instantly.',
-    color: "#f472b6",
+    label: "AI Chat Refinement",
+    desc: "Not happy with Day 3? Chat with AI to swap activities, change vibes, or cut costs instantly.",
+    span: "lg:col-span-1",
+    accent: "#f97316",
+    large: false,
   },
   {
     icon: Plane,
-    title: "Flights & Hotels Integrated",
-    description:
-      "Real-time Amadeus data for flights and hotels. Compare prices, see availability, book with confidence.",
-    color: "#38bdf8",
+    label: "Flights & Hotels",
+    desc: "Search real flights and hotels via Amadeus and book with Skyscanner or Booking.com.",
+    span: "lg:col-span-2",
+    accent: "#6366f1",
+    large: false,
   },
   {
     icon: Heart,
-    title: "Save & Share Trips",
-    description:
-      "Save your favourite itineraries, revisit them anytime, and share with your travel companions.",
-    color: "#86efac",
+    label: "Save & Share",
+    desc: "Save your trips, share public links, or export to PDF. Your itinerary, everywhere.",
+    span: "lg:col-span-1",
+    accent: "#ec4899",
+    large: false,
   },
 ];
 
 export default function FeaturesSection() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section ref={ref} className="relative py-32 px-4">
-      {/* Background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00f5d4]/20 to-transparent" />
-      </div>
+    <section id="features" className="py-24 px-4 bg-white" ref={ref}>
+      <div className="max-w-5xl mx-auto">
 
-      <div className="max-w-6xl mx-auto">
-        {/* Section header */}
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
-          className="text-center mb-20"
+          initial={{ opacity: 0, y: 14 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.55 }}
+          className="mb-14 max-w-xl"
         >
-          <span className="inline-block text-[#00f5d4] text-sm font-semibold uppercase tracking-widest mb-4">
+          <p className="text-xs font-semibold text-[#0d9488] uppercase tracking-[0.12em] mb-3">Features</p>
+          <h2 className="text-4xl sm:text-5xl font-bold text-[#0f172a] tracking-tight leading-[1.08] mb-4">
             Everything you need
-          </span>
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-            Travel planning,{" "}
-            <span
-              style={{
-                background: "linear-gradient(135deg, #00f5d4, #00c4aa)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              reimagined.
-            </span>
+            <br />to travel smarter
           </h2>
-          <p className="text-white/50 text-lg max-w-2xl mx-auto">
-            Everything your travel agent could do — done in minutes, at a fraction of the cost,
-            with an experience that feels like magic.
+          <p className="text-slate-400 text-lg leading-relaxed">
+            From AI-generated itineraries to real-time flight search — one tool, entire trip.
           </p>
         </motion.div>
 
-        {/* Feature grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURES.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 40 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                className="group glass rounded-3xl p-8 cursor-default"
+        {/* Bento grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {FEATURES.map((f, i) => (
+            <motion.div
+              key={f.label}
+              initial={{ opacity: 0, y: 16 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.45, delay: i * 0.07 }}
+              className={`group relative bg-white rounded-2xl border border-slate-200 p-6 hover:border-slate-300 hover:shadow-[0_4px_20px_rgba(0,0,0,0.05)] transition-all duration-200 cursor-default ${f.span}`}
+            >
+              {/* Icon */}
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center mb-5"
+                style={{ background: `${f.accent}12` }}
               >
-                {/* Icon */}
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110"
-                  style={{
-                    background: `linear-gradient(135deg, ${feature.color}22, ${feature.color}11)`,
-                    border: `1px solid ${feature.color}30`,
-                  }}
-                >
-                  <Icon className="w-6 h-6" style={{ color: feature.color }} />
-                </div>
+                <f.icon className="w-4 h-4" style={{ color: f.accent }} />
+              </div>
 
-                <h3 className="text-white font-semibold text-lg mb-3">{feature.title}</h3>
-                <p className="text-white/50 leading-relaxed text-sm">{feature.description}</p>
+              <h3 className="font-semibold text-[#0f172a] text-sm mb-2">{f.label}</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">{f.desc}</p>
 
-                {/* Bottom accent line */}
-                <div
-                  className="mt-6 h-px w-0 group-hover:w-full transition-all duration-500"
-                  style={{ background: `linear-gradient(90deg, ${feature.color}60, transparent)` }}
-                />
-              </motion.div>
-            );
-          })}
+              {/* Accent bottom line on hover */}
+              <div
+                className="absolute bottom-0 left-6 right-6 h-px rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ background: f.accent }}
+              />
+            </motion.div>
+          ))}
         </div>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="mt-10 flex justify-center"
+        >
+          <a
+            href="/generate"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#0f172a] hover:text-slate-600 transition-colors group"
+          >
+            Start planning for free
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </a>
+        </motion.div>
       </div>
     </section>
   );

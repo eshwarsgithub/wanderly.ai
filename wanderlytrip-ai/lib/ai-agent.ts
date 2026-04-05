@@ -1,6 +1,6 @@
 import { ChatAnthropic } from "@langchain/anthropic";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-import type { WeatherDay } from "./weather";
+import { z } from "zod";
 
 // Structured schema for a single activity in the itinerary
 export interface Activity {
@@ -14,7 +14,7 @@ export interface Activity {
   currency: string;
   duration: string;      // e.g. "2 hours"
   tips: string;
-  imageQuery: string;    // search query for image lookup
+  imageQuery: string;    // search query for Unsplash placeholder
 }
 
 export interface ItineraryDay {
@@ -24,6 +24,7 @@ export interface ItineraryDay {
   activities: Activity[];
   dailyCost: number;
   mood: string;          // e.g. "Adventurous & energetic"
+  city?: string;         // for multi-destination trips
 }
 
 export interface GeneratedItinerary {
@@ -42,19 +43,80 @@ export interface GeneratedItinerary {
   localCustoms: string[];
 }
 
-export type TravelerPersona = "solo" | "couple" | "family" | "group";
+export interface DestinationStop {
+  city: string;
+  days: number;
+}
 
 export interface TripInput {
-  destination: string;
+  destination: string;           // primary / display destination
+  destinations?: DestinationStop[]; // multi-destination stops (optional)
   startDate: string;
   endDate: string;
   budget: number;
   travelers: number;
   vibe: string;
-  persona: TravelerPersona;
-  avoidTouristTraps: boolean;
-  dietaryRestrictions?: string[];
-  weather?: WeatherDay[];
+}
+
+// ── Zod schemas for runtime validation of AI output ──────────────────────────
+const ActivitySchema = z.object({
+  id: z.string(),
+  time: z.string(),
+  name: z.string(),
+  description: z.string(),
+  location: z.string(),
+  category: z.enum(["food", "activity", "transport", "accommodation", "sightseeing"]),
+  estimatedCost: z.number(),
+  currency: z.string().default("USD"),
+  duration: z.string(),
+  tips: z.string(),
+  imageQuery: z.string(),
+});
+
+const ItineraryDaySchema = z.object({
+  day: z.number(),
+  date: z.string(),
+  theme: z.string(),
+  activities: z.array(ActivitySchema),
+  dailyCost: z.number(),
+  mood: z.string(),
+  city: z.string().optional(),
+});
+
+const GeneratedItinerarySchema = z.object({
+  id: z.string(),
+  destination: z.string(),
+  country: z.string(),
+  vibe: z.string(),
+  totalDays: z.number(),
+  totalBudget: z.number(),
+  currency: z.string().default("USD"),
+  summary: z.string(),
+  highlights: z.array(z.string()),
+  days: z.array(ItineraryDaySchema),
+  packingTips: z.array(z.string()),
+  bestTimeToVisit: z.string(),
+  localCustoms: z.array(z.string()),
+});
+
+function parseItineraryJSON(content: string): GeneratedItinerary {
+  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error("AI returned invalid response format");
+
+  let raw: unknown;
+  try {
+    raw = JSON.parse(jsonMatch[0]);
+  } catch {
+    throw new Error("AI returned malformed JSON");
+  }
+
+  const result = GeneratedItinerarySchema.safeParse(raw);
+  if (!result.success) {
+    const issues = result.error.issues.map((i) => i.message).join(", ");
+    throw new Error(`AI response failed validation: ${issues}`);
+  }
+
+  return result.data as GeneratedItinerary;
 }
 
 const SYSTEM_PROMPT = `You are WanderlyTrip AI, an expert travel planner. When given trip details, you generate a detailed, realistic, and exciting travel itinerary.
@@ -106,13 +168,7 @@ Rules:
 - Match activities to the requested vibe
 - Be specific about locations (real places)
 - Make descriptions vivid and emotional — sell the experience
-- totalBudget should be the sum of all daily costs
-
-Persona guidance:
-- solo: efficient pacing, budget-conscious, solo-friendly venues, mix of social + private experiences
-- couple: romantic touches, private dining options, sunset spots, intimate activities
-- family: child-friendly alternatives always included, practical timings, easy transit between spots
-- group: flexible timing, group discount awareness, mix of group activities and free time`;
+- totalBudget should be the sum of all daily costs`;
 
 export async function generateItinerary(input: TripInput): Promise<GeneratedItinerary> {
   const model = new ChatAnthropic({
@@ -126,35 +182,21 @@ export async function generateItinerary(input: TripInput): Promise<GeneratedItin
   const endDate = new Date(input.endDate);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Compute contextual enrichments
-  const month = startDate.getMonth();
-  const season = month <= 1 || month === 11 ? "winter"
-    : month <= 4 ? "spring"
-    : month <= 7 ? "summer" : "fall";
-  const perPersonBudget = Math.round(input.budget / input.travelers);
+  const isMultiDestination = input.destinations && input.destinations.length > 1;
+  const destinationDesc = isMultiDestination
+    ? input.destinations!.map((d) => `${d.days} days in ${d.city}`).join(", then ")
+    : `${days} days in ${input.destination}`;
 
-  let weatherContext = "";
-  if (input.weather && input.weather.length > 0) {
-    const lines = input.weather.slice(0, days).map((w) =>
-      `  - ${w.date}: High ${w.tempHighC}°C / Low ${w.tempLowC}°C, ${w.description}, ${w.precipitationChance}% rain chance`
-    );
-    weatherContext = `\nWeather forecast:\n${lines.join("\n")}\nAdapt outdoor activities, clothing tips, and indoor alternatives based on this forecast.`;
-  }
-
-  const dietaryNote = input.dietaryRestrictions && input.dietaryRestrictions.length > 0
-    ? `\nDietary restrictions: ${input.dietaryRestrictions.join(", ")} — ensure food recommendations respect these.`
+  const cityFieldNote = isMultiDestination
+    ? `\n- Each day object must include a "city" field indicating which city that day is in.`
     : "";
 
-  const touristTrapNote = input.avoidTouristTraps
-    ? "\nAvoid obvious tourist traps — favor local haunts, neighborhood spots, and experiences that feel authentic over mass-tourism venues."
-    : "";
-
-  const userPrompt = `Plan a ${days}-day ${input.vibe} trip to ${input.destination}.
+  const userPrompt = `Plan a ${input.vibe} trip: ${destinationDesc}.
 - Dates: ${input.startDate} to ${input.endDate}
-- Budget: $${input.budget} USD total ($${perPersonBudget}/person) for ${input.travelers} traveler(s)
+- Total days: ${days}
+- Budget: $${input.budget} USD total for ${input.travelers} traveler(s)
 - Vibe: ${input.vibe}
-- Season: ${season}
-- Traveler persona: ${input.persona}${touristTrapNote}${dietaryNote}${weatherContext}
+- Travelers: ${input.travelers}${cityFieldNote}
 
 Generate the complete itinerary JSON now.`;
 
@@ -164,12 +206,7 @@ Generate the complete itinerary JSON now.`;
   ]);
 
   const content = response.content as string;
-  const jsonMatch = content.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error("AI returned invalid response format");
-  }
-
-  const itinerary = JSON.parse(jsonMatch[0]) as GeneratedItinerary;
+  const itinerary = parseItineraryJSON(content);
 
   if (!itinerary.id) {
     itinerary.id = `trip-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -193,166 +230,10 @@ export async function refineItinerary(
   const response = await model.invoke([
     new SystemMessage(SYSTEM_PROMPT),
     new HumanMessage(
-      `Here is the current itinerary JSON:\n${JSON.stringify(itinerary, null, 2)}\n\nUser request: "${userRequest}"\n\nApply the changes and return the updated complete itinerary JSON.`
+      `Here is the current itinerary JSON:\n${JSON.stringify(itinerary, null, 2)}\n\nUser request: "${userRequest}"\n\nConstraint: The total cost of all activities must not exceed the original budget of $${itinerary.totalBudget} USD. Adjust activity costs accordingly.\n\nApply the changes and return the updated complete itinerary JSON.`
     ),
   ]);
 
   const content = response.content as string;
-  const jsonMatch = content.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("AI returned invalid response format");
-
-  return JSON.parse(jsonMatch[0]) as GeneratedItinerary;
-}
-
-// Parse natural language trip description into partial TripInput
-export async function parseNaturalLanguage(text: string): Promise<Partial<TripInput>> {
-  const model = new ChatAnthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-    model: "claude-haiku-4-5-20251001",
-    maxTokens: 500,
-    temperature: 0.2,
-  });
-
-  const today = new Date().toISOString().split("T")[0];
-
-  const response = await model.invoke([
-    new SystemMessage(
-      `Extract structured trip data from natural language. Return ONLY valid JSON with any fields you can confidently extract. Omit fields you cannot determine. Today is ${today}.
-
-JSON schema (all fields optional):
-{
-  "destination": "string",
-  "startDate": "YYYY-MM-DD",
-  "endDate": "YYYY-MM-DD",
-  "budget": number,
-  "travelers": number,
-  "vibe": "one of: adventure|culture|food|relaxation|romantic|luxury|chill",
-  "persona": "one of: solo|couple|family|group",
-  "avoidTouristTraps": boolean
-}
-
-Return raw JSON only, no markdown.`
-    ),
-    new HumanMessage(text),
-  ]);
-
-  try {
-    const content = response.content as string;
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return {};
-    return JSON.parse(jsonMatch[0]) as Partial<TripInput>;
-  } catch {
-    return {};
-  }
-}
-
-// Get 3 alternative activities for a given time slot
-export async function getActivityAlternatives(
-  itinerary: GeneratedItinerary,
-  dayIndex: number,
-  activityId: string
-): Promise<Activity[]> {
-  const day = itinerary.days[dayIndex];
-  const activity = day?.activities.find((a) => a.id === activityId);
-  if (!activity) return [];
-
-  const model = new ChatAnthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-    model: "claude-haiku-4-5-20251001",
-    maxTokens: 2000,
-    temperature: 0.8,
-  });
-
-  const response = await model.invoke([
-    new SystemMessage(
-      `You are a travel expert. Return ONLY a valid JSON array of exactly 3 Activity objects. No markdown, no explanation.
-
-Activity schema:
-{
-  "id": "string",
-  "time": "HH:MM",
-  "name": "string",
-  "description": "2-3 sentence description",
-  "location": "specific location",
-  "category": "food|activity|transport|accommodation|sightseeing",
-  "estimatedCost": number,
-  "currency": "USD",
-  "duration": "X hours",
-  "tips": "local tip",
-  "imageQuery": "search query"
-}`
-    ),
-    new HumanMessage(
-      `For a ${itinerary.vibe} trip to ${itinerary.destination}, suggest 3 alternative activities to replace "${activity.name}" at ${activity.time} on Day ${dayIndex + 1} (theme: "${day.theme}"). Budget for this slot: ~$${activity.estimatedCost}. Return a JSON array of 3 Activity objects with unique ids like "alt-1", "alt-2", "alt-3".`
-    ),
-  ]);
-
-  try {
-    const content = response.content as string;
-    const jsonMatch = content.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) return [];
-    return JSON.parse(jsonMatch[0]) as Activity[];
-  } catch {
-    return [];
-  }
-}
-
-// Compute a plain-English diff between two itineraries (max 8 changes)
-export function computeItineraryDiff(
-  before: GeneratedItinerary,
-  after: GeneratedItinerary
-): string[] {
-  const changes: string[] = [];
-
-  if (before.totalBudget !== after.totalBudget) {
-    changes.push(`Budget updated from $${before.totalBudget.toLocaleString()} to $${after.totalBudget.toLocaleString()}`);
-  }
-
-  if (before.summary !== after.summary) {
-    changes.push("Trip summary refreshed");
-  }
-
-  // Check each day for activity changes
-  for (const afterDay of after.days) {
-    const beforeDay = before.days.find((d) => d.day === afterDay.day);
-    if (!beforeDay) {
-      changes.push(`Day ${afterDay.day} added: "${afterDay.theme}"`);
-      continue;
-    }
-
-    if (beforeDay.theme !== afterDay.theme) {
-      changes.push(`Day ${afterDay.day} theme changed to "${afterDay.theme}"`);
-    }
-
-    const beforeIds = new Set(beforeDay.activities.map((a) => a.id));
-    const afterIds = new Set(afterDay.activities.map((a) => a.id));
-
-    for (const a of afterDay.activities) {
-      if (!beforeIds.has(a.id)) {
-        changes.push(`Day ${afterDay.day}: "${a.name}" added`);
-      } else {
-        const prev = beforeDay.activities.find((x) => x.id === a.id);
-        if (prev && prev.name !== a.name) {
-          changes.push(`Day ${afterDay.day}: "${prev.name}" renamed to "${a.name}"`);
-        }
-      }
-      if (changes.length >= 8) break;
-    }
-
-    for (const a of beforeDay.activities) {
-      if (!afterIds.has(a.id)) {
-        changes.push(`Day ${afterDay.day}: "${a.name}" removed`);
-      }
-      if (changes.length >= 8) break;
-    }
-
-    if (changes.length >= 8) break;
-  }
-
-  // Check packing tips diff
-  if (changes.length < 8 && before.packingTips.length !== after.packingTips.length) {
-    changes.push(`Packing list updated (${after.packingTips.length} tips)`);
-  }
-
-  return changes.slice(0, 8);
+  return parseItineraryJSON(content);
 }

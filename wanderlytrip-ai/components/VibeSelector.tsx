@@ -1,79 +1,65 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
 import {
-  Mountain, Landmark, UtensilsCrossed, Waves, Heart, Crown, Coffee,
+  Mountain, Landmark, UtensilsCrossed, Waves,
+  Heart, Gem, Coffee
 } from "lucide-react";
 
-const VIBES = [
-  { id: "adventure", label: "Adventure", icon: Mountain, color: "#ff6b35" },
-  { id: "culture", label: "Culture", icon: Landmark, color: "#a78bfa" },
-  { id: "food", label: "Food", icon: UtensilsCrossed, color: "#fbbf24" },
-  { id: "relaxation", label: "Relaxation", icon: Waves, color: "#38bdf8" },
-  { id: "romantic", label: "Romantic", icon: Heart, color: "#f472b6" },
-  { id: "luxury", label: "Luxury", icon: Crown, color: "#00f5d4" },
-  { id: "chill", label: "Chill", icon: Coffee, color: "#86efac" },
+export const VIBES = [
+  { id: "adventure",  label: "Adventure",  icon: Mountain,        color: "#f97316" },
+  { id: "culture",    label: "Culture",    icon: Landmark,        color: "#8b5cf6" },
+  { id: "food",       label: "Food",       icon: UtensilsCrossed, color: "#ec4899" },
+  { id: "relaxation", label: "Relaxation", icon: Waves,           color: "#0ea5e9" },
+  { id: "romantic",   label: "Romantic",   icon: Heart,           color: "#f43f5e" },
+  { id: "luxury",     label: "Luxury",     icon: Gem,             color: "#eab308" },
+  { id: "chill",      label: "Chill",      icon: Coffee,          color: "#14b8a6" },
 ];
 
 interface VibeSelectorProps {
-  selected?: string;
-  onSelect?: (vibe: string) => void;
-  className?: string;
+  selected: string;
+  onSelect: (vibe: string) => void;
 }
 
-export default function VibeSelector({ selected, onSelect, className = "" }: VibeSelectorProps) {
-  const [hovered, setHovered] = useState<string | null>(null);
-
+export default function VibeSelector({ selected, onSelect }: VibeSelectorProps) {
   return (
-    <div className={`flex flex-wrap justify-center gap-3 ${className}`}>
-      {VIBES.map((vibe, index) => {
-        const Icon = vibe.icon;
+    <div className="flex flex-wrap gap-2">
+      {VIBES.map((vibe, i) => {
         const isSelected = selected === vibe.id;
-        const isHovered = hovered === vibe.id;
-
         return (
           <motion.button
             key={vibe.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.05 }}
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.95 }}
-            onHoverStart={() => setHovered(vibe.id)}
-            onHoverEnd={() => setHovered(null)}
-            onClick={() => onSelect?.(vibe.id)}
-            className="relative flex items-center gap-2 px-5 py-2.5 rounded-full transition-all duration-300 font-medium text-sm"
-            style={{
-              background: isSelected
-                ? `linear-gradient(135deg, ${vibe.color}22, ${vibe.color}11)`
-                : isHovered
-                ? `linear-gradient(135deg, ${vibe.color}15, transparent)`
-                : "rgba(255,255,255,0.05)",
-              border: isSelected
-                ? `1.5px solid ${vibe.color}80`
-                : isHovered
-                ? `1.5px solid ${vibe.color}40`
-                : "1.5px solid rgba(255,255,255,0.1)",
-              color: isSelected ? vibe.color : isHovered ? vibe.color : "rgba(255,255,255,0.6)",
-              boxShadow: isSelected ? `0 0 16px ${vibe.color}30` : "none",
-            }}
+            type="button"
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.04 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => onSelect(vibe.id)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-150 border"
+            style={
+              isSelected
+                ? {
+                    background: `${vibe.color}10`,
+                    borderColor: `${vibe.color}40`,
+                    color: vibe.color,
+                    boxShadow: `0 0 0 3px ${vibe.color}12`,
+                  }
+                : {
+                    background: "#ffffff",
+                    borderColor: "#e2e8f0",
+                    color: "#64748b",
+                    boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+                  }
+            }
           >
-            {/* Glow dot for selected */}
-            {isSelected && (
-              <motion.div
-                layoutId="vibe-glow"
-                className="absolute inset-0 rounded-full"
-                style={{ boxShadow: `0 0 24px ${vibe.color}40` }}
-              />
-            )}
-            <Icon className="w-4 h-4 relative" />
-            <span className="relative">{vibe.label}</span>
+            <vibe.icon
+              className="w-3.5 h-3.5 flex-shrink-0"
+              style={{ color: isSelected ? vibe.color : "#94a3b8" }}
+            />
+            {vibe.label}
           </motion.button>
         );
       })}
     </div>
   );
 }
-
-export { VIBES };

@@ -14,10 +14,7 @@ export function getSupabase(): SupabaseClient {
   return _client;
 }
 
-// ─────────────────────────────────────────────────────────
-// TRIPS
-// ─────────────────────────────────────────────────────────
-
+// Types matching the `trips` table in Supabase
 export interface TripRecord {
   id: string;
   user_id: string;
@@ -29,8 +26,6 @@ export interface TripRecord {
   end_date: string;
   itinerary: GeneratedItinerary;
   created_at: string;
-  is_public: boolean;
-  share_slug: string | null;
 }
 
 // Auth helpers
@@ -51,7 +46,7 @@ export async function getUser() {
   return user;
 }
 
-// Trip CRUD
+// Trip CRUD — uses `any` cast to work around strict generic inference on untyped schema
 export async function saveTrip(trip: Omit<TripRecord, "created_at">) {
   const db = getSupabase();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -95,214 +90,28 @@ export async function deleteTrip(tripId: string) {
   if (error) throw error;
 }
 
-// ─────────────────────────────────────────────────────────
-// SHARING (11.1)
-// ─────────────────────────────────────────────────────────
-
-export function generateSlug(destination: string): string {
-  const base = destination
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .slice(0, 30);
-  const suffix = Math.random().toString(36).slice(2, 8);
-  return `${base}-${suffix}`;
-}
-
-export async function publishTrip(tripId: string, slug: string): Promise<void> {
+// Generate a unique share token and make the trip public
+export async function shareTrip(tripId: string): Promise<string> {
+  const { nanoid } = await import("nanoid");
+  const token = nanoid(12);
   const db = getSupabase();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (db.from("trips") as any)
-    .update({ is_public: true, share_slug: slug })
+    .update({ share_token: token, is_public: true })
     .eq("id", tripId);
   if (error) throw error;
+  return token;
 }
 
-export async function loadTripBySlug(slug: string): Promise<TripRecord | null> {
+// Load a trip by its public share token (no auth required — RLS allows public reads)
+export async function loadTripByToken(token: string): Promise<TripRecord | null> {
   const db = getSupabase();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (db.from("trips") as any)
     .select("*")
-    .eq("share_slug", slug)
+    .eq("share_token", token)
     .eq("is_public", true)
     .single();
   if (error) return null;
   return data as TripRecord;
-}
-
-// ─────────────────────────────────────────────────────────
-// PUBLIC TRIPS / EXPLORE (11.2)
-// ─────────────────────────────────────────────────────────
-
-export interface PublicTripsFilter {
-  vibe?: string;
-  destination?: string;
-  minDays?: number;
-  maxDays?: number;
-}
-
-export async function loadPublicTrips(filters?: PublicTripsFilter): Promise<TripRecord[]> {
-  const db = getSupabase();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (db.from("trips") as any)
-    .select("*")
-    .eq("is_public", true)
-    .order("created_at", { ascending: false })
-    .limit(24);
-
-  if (filters?.vibe) query = query.eq("vibe", filters.vibe);
-  if (filters?.destination) query = query.ilike("destination", `%${filters.destination}%`);
-
-  const { data, error } = await query;
-  if (error) return [];
-  return (data ?? []) as TripRecord[];
-}
-
-// ─────────────────────────────────────────────────────────
-// USER PROFILE (9.8)
-// ─────────────────────────────────────────────────────────
-
-export interface UserProfile {
-  id: string;
-  home_city: string | null;
-  currency: string;
-  dietary: string[];
-  travel_style: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export async function loadProfile(userId: string): Promise<UserProfile | null> {
-  const db = getSupabase();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (db.from("user_profiles") as any)
-    .select("*")
-    .eq("id", userId)
-    .single();
-  if (error) return null;
-  return data as UserProfile;
-}
-
-export async function saveProfile(
-  profile: Omit<UserProfile, "created_at" | "updated_at">
-): Promise<UserProfile> {
-  const db = getSupabase();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (db.from("user_profiles") as any)
-    .upsert(profile, { onConflict: "id" })
-    .select()
-    .single();
-  if (error) throw error;
-  return data as UserProfile;
-}
-
-// ─────────────────────────────────────────────────────────
-// PRICE ALERTS (10.2)
-// ─────────────────────────────────────────────────────────
-
-export interface PriceAlert {
-  id: string;
-  user_id: string;
-  origin: string;
-  destination: string;
-  travel_date: string;
-  adults: number;
-  last_price: number | null;
-  created_at: string;
-}
-
-export async function createPriceAlert(
-  alert: Omit<PriceAlert, "id" | "created_at">
-): Promise<PriceAlert> {
-  const db = getSupabase();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (db.from("price_alerts") as any)
-    .insert(alert)
-    .select()
-    .single();
-  if (error) throw error;
-  return data as PriceAlert;
-}
-
-export async function loadPriceAlerts(userId: string): Promise<PriceAlert[]> {
-  const db = getSupabase();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (db.from("price_alerts") as any)
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-  if (error) return [];
-  return (data ?? []) as PriceAlert[];
-}
-
-export async function deletePriceAlert(alertId: string): Promise<void> {
-  const db = getSupabase();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (db.from("price_alerts") as any).delete().eq("id", alertId);
-  if (error) throw error;
-}
-
-// ─────────────────────────────────────────────────────────
-// COLLABORATORS (11.3)
-// ─────────────────────────────────────────────────────────
-
-export interface CollaboratorRecord {
-  id: string;
-  trip_id: string;
-  user_id: string | null;
-  email: string;
-  role: "viewer" | "editor";
-  accepted: boolean;
-  created_at: string;
-}
-
-export async function inviteCollaborator(
-  tripId: string,
-  email: string,
-  role: "viewer" | "editor"
-): Promise<void> {
-  const db = getSupabase();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (db.from("trip_collaborators") as any).insert({ trip_id: tripId, email, role });
-  if (error) throw error;
-}
-
-export async function loadCollaborators(tripId: string): Promise<CollaboratorRecord[]> {
-  const db = getSupabase();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (db.from("trip_collaborators") as any)
-    .select("*")
-    .eq("trip_id", tripId);
-  if (error) return [];
-  return (data ?? []) as CollaboratorRecord[];
-}
-
-export async function removeCollaborator(collaboratorId: string): Promise<void> {
-  const db = getSupabase();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (db.from("trip_collaborators") as any).delete().eq("id", collaboratorId);
-  if (error) throw error;
-}
-
-export function subscribeToTrip(
-  tripId: string,
-  callback: (itinerary: GeneratedItinerary) => void
-): () => void {
-  const channel = getSupabase()
-    .channel(`trip:${tripId}`)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .on("postgres_changes" as any, {
-      event: "UPDATE",
-      schema: "public",
-      table: "trips",
-      filter: `id=eq.${tripId}`,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }, (payload: any) => {
-      const record = payload.new as TripRecord;
-      if (record.itinerary) callback(record.itinerary);
-    })
-    .subscribe();
-
-  return () => { channel.unsubscribe(); };
 }

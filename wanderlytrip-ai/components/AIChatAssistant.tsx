@@ -5,14 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Sparkles, User, Bot } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { refineTripAction } from "@/app/actions/generate-itinerary";
-import { computeItineraryDiff } from "@/lib/ai-agent";
 import type { GeneratedItinerary } from "@/lib/ai-agent";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
-  type?: "normal" | "diff";
-  diffItems?: string[];
 }
 
 interface AIChatAssistantProps {
@@ -49,30 +46,17 @@ export default function AIChatAssistant({ itinerary, onItineraryUpdate }: AIChat
     setMessages((m) => [...m, userMsg]);
     setInput("");
 
-    const prevItinerary = itinerary;
-
     startTransition(async () => {
       const result = await refineTripAction(itinerary, text);
       if (result.success) {
         onItineraryUpdate(result.itinerary);
-        const changes = computeItineraryDiff(prevItinerary, result.itinerary);
-
-        if (changes.length === 0) {
-          setMessages((m) => [
-            ...m,
-            { role: "assistant", content: "Done! Your itinerary has been updated. ✨" },
-          ]);
-        } else {
-          setMessages((m) => [
-            ...m,
-            {
-              role: "assistant",
-              content: "Here's what changed:",
-              type: "diff",
-              diffItems: changes,
-            },
-          ]);
-        }
+        setMessages((m) => [
+          ...m,
+          {
+            role: "assistant",
+            content: `Done! I've updated your itinerary based on your request. Check the timeline for the changes.`,
+          },
+        ]);
       } else {
         setMessages((m) => [
           ...m,
@@ -86,13 +70,12 @@ export default function AIChatAssistant({ itinerary, onItineraryUpdate }: AIChat
     <>
       {/* Floating button */}
       <motion.button
-        whileHover={{ scale: 1.08 }}
+        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 left-6 z-40 flex items-center gap-2 px-4 py-3 rounded-2xl font-medium text-sm text-[#0a0a0a] teal-glow transition-all ${isOpen ? "opacity-0 pointer-events-none" : ""}`}
-        style={{ background: "linear-gradient(135deg, #00f5d4, #00c4aa)" }}
+        className={`fixed bottom-6 left-6 z-40 flex items-center gap-2 px-4 py-3 rounded-2xl font-semibold text-sm bg-[#0f172a] text-white shadow-lg hover:shadow-xl transition-all ${isOpen ? "opacity-0 pointer-events-none" : ""}`}
       >
-        <MessageCircle className="w-4 h-4" />
+        <Sparkles className="w-4 h-4 text-[#00f5d4]" />
         Refine Trip
       </motion.button>
 
@@ -104,22 +87,21 @@ export default function AIChatAssistant({ itinerary, onItineraryUpdate }: AIChat
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.95 }}
             transition={{ duration: 0.25 }}
-            className="fixed bottom-6 left-6 z-50 w-80 sm:w-96 glass rounded-3xl overflow-hidden teal-glow-sm flex flex-col"
+            className="fixed bottom-6 left-6 z-50 w-80 sm:w-96 bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col"
             style={{ maxHeight: "480px" }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/10 flex-shrink-0">
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 flex-shrink-0">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, #00f5d4, #00c4aa)" }}>
-                  <Sparkles className="w-4 h-4 text-[#0a0a0a]" />
+                <div className="w-8 h-8 rounded-xl bg-[#0f172a] flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-[#00f5d4]" />
                 </div>
                 <div>
-                  <p className="text-white font-semibold text-sm">AI Assistant</p>
-                  <p className="text-white/40 text-xs">Refine your itinerary</p>
+                  <p className="text-[#0f172a] font-semibold text-sm">AI Assistant</p>
+                  <p className="text-slate-400 text-xs">Refine your itinerary</p>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-white/40 hover:text-white transition-colors">
+              <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -136,52 +118,37 @@ export default function AIChatAssistant({ itinerary, onItineraryUpdate }: AIChat
                   <div
                     className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
                     style={{
-                      background: msg.role === "assistant"
-                        ? "linear-gradient(135deg, #00f5d4, #00c4aa)"
-                        : "rgba(255,255,255,0.1)",
+                      background: msg.role === "assistant" ? "#0f172a" : "#f1f5f9",
                     }}
                   >
                     {msg.role === "assistant"
-                      ? <Bot className="w-3.5 h-3.5 text-[#0a0a0a]" />
-                      : <User className="w-3.5 h-3.5 text-white" />}
+                      ? <Bot className="w-3.5 h-3.5 text-[#00f5d4]" />
+                      : <User className="w-3.5 h-3.5 text-slate-500" />}
                   </div>
                   <div
                     className="flex-1 px-3 py-2 rounded-2xl text-sm leading-relaxed"
                     style={{
-                      background: msg.role === "assistant"
-                        ? "rgba(0,245,212,0.08)"
-                        : "rgba(255,255,255,0.08)",
-                      color: msg.role === "assistant" ? "rgba(240,255,254,0.9)" : "rgba(240,255,254,0.8)",
+                      background: msg.role === "assistant" ? "#f8fafc" : "#0f172a",
+                      color: msg.role === "assistant" ? "#475569" : "#ffffff",
                     }}
                   >
                     {msg.content}
-                    {msg.type === "diff" && msg.diffItems && msg.diffItems.length > 0 && (
-                      <ul className="mt-2 space-y-1">
-                        {msg.diffItems.map((item, j) => (
-                          <li key={j} className="flex items-start gap-1.5 text-xs text-[#00f5d4]/80">
-                            <span className="mt-1 w-1.5 h-1.5 rounded-full bg-[#00f5d4] flex-shrink-0" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
                   </div>
                 </motion.div>
               ))}
 
               {isPending && (
                 <div className="flex gap-2">
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ background: "linear-gradient(135deg, #00f5d4, #00c4aa)" }}>
-                    <Bot className="w-3.5 h-3.5 text-[#0a0a0a]" />
+                  <div className="w-7 h-7 rounded-full bg-[#0f172a] flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-3.5 h-3.5 text-[#00f5d4]" />
                   </div>
-                  <div className="px-3 py-2 rounded-2xl bg-[#00f5d4]/10">
-                    <div className="flex gap-1">
+                  <div className="px-3 py-2 rounded-2xl bg-[#f8fafc] border border-slate-100">
+                    <div className="flex gap-1 items-center h-4">
                       {[0, 1, 2].map((i) => (
                         <motion.div
                           key={i}
-                          className="w-1.5 h-1.5 rounded-full bg-[#00f5d4]"
-                          animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }}
+                          className="w-1.5 h-1.5 rounded-full bg-slate-300"
+                          animate={{ opacity: [0.4, 1, 0.4], y: [0, -3, 0] }}
                           transition={{ duration: 0.8, delay: i * 0.2, repeat: Infinity }}
                         />
                       ))}
@@ -199,7 +166,7 @@ export default function AIChatAssistant({ itinerary, onItineraryUpdate }: AIChat
                   key={s}
                   onClick={() => sendMessage(s)}
                   disabled={isPending}
-                  className="text-xs px-3 py-1.5 rounded-full border border-[#00f5d4]/20 text-[#00f5d4]/70 hover:bg-[#00f5d4]/10 hover:text-[#00f5d4] transition-colors disabled:opacity-40"
+                  className="text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300 transition-colors disabled:opacity-40"
                 >
                   {s}
                 </button>
@@ -207,24 +174,23 @@ export default function AIChatAssistant({ itinerary, onItineraryUpdate }: AIChat
             </div>
 
             {/* Input */}
-            <div className="p-4 pt-2 flex gap-2 flex-shrink-0">
+            <div className="p-4 pt-2 flex gap-2 flex-shrink-0 border-t border-slate-50">
               <Input
                 placeholder="Ask AI to refine your trip..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
                 disabled={isPending}
-                className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#00f5d4]/40 rounded-xl text-sm"
+                className="flex-1 bg-slate-50 border-slate-200 text-[#0f172a] placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-200 rounded-xl text-sm h-10"
               />
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => sendMessage(input)}
                 disabled={isPending || !input.trim()}
-                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 disabled:opacity-40"
-                style={{ background: "linear-gradient(135deg, #00f5d4, #00c4aa)" }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-[#0f172a] disabled:opacity-40 hover:bg-[#1e293b] transition-colors"
               >
-                <Send className="w-4 h-4 text-[#0a0a0a]" />
+                <Send className="w-4 h-4 text-white" />
               </motion.button>
             </div>
           </motion.div>

@@ -1,38 +1,23 @@
 import Navbar from "@/components/Navbar";
 import TripForm from "@/components/TripForm";
-import { Sparkles } from "lucide-react";
 
 export default function GeneratePage() {
   return (
-    <main className="min-h-screen bg-[#0a0a0a]">
+    <main className="min-h-screen">
       <Navbar />
-
-      {/* Background aurora */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] opacity-15"
-          style={{
-            background: "radial-gradient(ellipse, #00f5d4, transparent 70%)",
-          }}
-        />
-      </div>
-
-      <div className="relative z-10 pt-28 pb-20 px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-6">
-            <Sparkles className="w-4 h-4 text-[#00f5d4]" />
-            <span className="text-sm text-[#00f5d4] font-medium">AI Trip Generator</span>
+      <div className="pt-28 pb-20 px-4">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-600 text-sm font-medium mb-6">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#14b8a6]" />
+            AI Trip Generator
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+          <h1 className="text-4xl sm:text-5xl font-bold text-[#0f172a] tracking-tight mb-4">
             Tell us your dream trip
           </h1>
-          <p className="text-white/50 text-lg max-w-xl mx-auto">
-            Fill in the details below and Claude AI will craft a complete, beautiful itinerary
-            tailored exactly to your vibe.
+          <p className="text-slate-500 text-lg max-w-lg mx-auto leading-relaxed">
+            Claude AI will craft a complete, personalised itinerary tailored exactly to your vibe.
           </p>
         </div>
-
         <TripForm />
       </div>
     </main>

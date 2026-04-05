@@ -1,193 +1,217 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Sparkles, Globe } from "lucide-react";
+import { ArrowRight, Sparkles, MapPin, Zap } from "lucide-react";
+
+const FLOAT_CARDS = [
+  { icon: "🗼", label: "Paris, France",    sub: "5 days · Culture",    delay: 0 },
+  { icon: "🌸", label: "Kyoto, Japan",     sub: "7 days · Adventure",  delay: 0.15 },
+  { icon: "🏖️", label: "Bali, Indonesia", sub: "10 days · Relaxation", delay: 0.3 },
+];
+
+const fade: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  show: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, delay: i * 0.09, ease: "easeOut" as const },
+  }),
+};
 
 export default function HeroSection() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-
   return (
-    <section ref={ref} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Cinematic background */}
-      <motion.div style={{ y }} className="absolute inset-0 z-0">
-        {/* Mountain gradient base */}
-        <div className="absolute inset-0 mountain-gradient" />
+    <section className="relative pt-32 pb-24 px-4 overflow-hidden bg-white">
 
-        {/* Animated teal aurora */}
-        <motion.div
-          className="absolute inset-0"
-          animate={{
-            background: [
-              "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,245,212,0.15) 0%, transparent 70%)",
-              "radial-gradient(ellipse 80% 60% at 60% -10%, rgba(0,196,170,0.12) 0%, transparent 70%)",
-              "radial-gradient(ellipse 80% 50% at 40% -20%, rgba(0,245,212,0.15) 0%, transparent 70%)",
-            ],
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {/* Grid overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(0,245,212,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,245,212,1) 1px, transparent 1px)",
-            backgroundSize: "80px 80px",
-          }}
-        />
-
-        {/* Bottom fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
-      </motion.div>
-
-      {/* Floating orbs */}
-      <motion.div
-        className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-10 pointer-events-none"
-        style={{ background: "radial-gradient(circle, #00f5d4, transparent 70%)" }}
-        animate={{ scale: [1, 1.2, 1], x: [-20, 20, -20], y: [-10, 10, -10] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute bottom-1/3 right-1/4 w-64 h-64 rounded-full opacity-8 pointer-events-none"
-        style={{ background: "radial-gradient(circle, #00c4aa, transparent 70%)" }}
-        animate={{ scale: [1.2, 1, 1.2], x: [20, -20, 20], y: [10, -10, 10] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+      {/* Fine dot grid */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: "radial-gradient(circle, #e2e8f0 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+          opacity: 0.7,
+        }}
       />
 
-      {/* Content */}
-      <motion.div
-        style={{ opacity }}
-        className="relative z-10 text-center px-4 max-w-5xl mx-auto"
-      >
+      {/* Very faint centre vignette to lift content */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(255,255,255,0.95) 0%, transparent 80%)",
+        }}
+      />
+
+      <div className="relative max-w-5xl mx-auto">
+
         {/* Badge */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8 teal-glow-sm"
+          variants={fade} initial="hidden" animate="show" custom={0}
+          className="flex justify-center mb-8"
         >
-          <Sparkles className="w-4 h-4 text-[#00f5d4]" />
-          <span className="text-sm text-[#00f5d4] font-medium">Powered by Claude AI</span>
-          <div className="w-1.5 h-1.5 rounded-full bg-[#00f5d4] animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-500 text-sm font-medium shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#14b8a6] animate-pulse flex-shrink-0" />
+            AI-powered travel planning
+            <span className="text-slate-300">·</span>
+            <span className="text-[#0d9488] font-semibold">Free to start</span>
+          </div>
         </motion.div>
 
-        {/* Main headline */}
+        {/* Headline */}
         <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1 }}
-          className="text-5xl sm:text-6xl lg:text-8xl font-bold tracking-tight mb-6 leading-[1.05]"
+          variants={fade} initial="hidden" animate="show" custom={1}
+          className="text-center text-5xl sm:text-6xl lg:text-[5rem] font-bold tracking-tight text-[#0f172a] leading-[1.06] mb-6"
         >
-          <span className="text-white">Plan your entire</span>
+          Plan your perfect trip
           <br />
-          <span
-            className="teal-text-glow"
-            style={{
-              background: "linear-gradient(135deg, #00f5d4 0%, #00c4aa 50%, #7ffff0 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            trip in minutes
+          <span className="relative inline-block mt-1">
+            <span className="relative z-10">in minutes, not days</span>
+            <motion.span
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.55, delay: 0.65, ease: "easeOut" as const }}
+              className="absolute bottom-1.5 left-0 right-0 h-2.5 -z-0 origin-left rounded-sm"
+              style={{ background: "rgba(13,148,136,0.14)" }}
+            />
           </span>
-          <br />
-          <span className="text-white/80">with AI.</span>
         </motion.h1>
 
         {/* Subheadline */}
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.25 }}
-          className="text-lg sm:text-xl text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed"
+          variants={fade} initial="hidden" animate="show" custom={2}
+          className="text-center text-lg text-slate-400 max-w-xl mx-auto leading-relaxed mb-10"
         >
-          Flights, hotels, restaurants, activities — all curated to your vibe in a
-          beautifully crafted itinerary. No more hours of planning. Just wander.
+          Tell us your destination, budget, and vibe.
+          Claude AI crafts a complete itinerary — tailored exactly to you.
         </motion.p>
 
-        {/* CTA buttons */}
+        {/* CTA row */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          variants={fade} initial="hidden" animate="show" custom={3}
+          className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-16"
         >
           <Link href="/generate">
             <motion.button
-              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
-              className="group relative flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-lg text-[#0a0a0a] overflow-hidden"
-              style={{ background: "linear-gradient(135deg, #00f5d4 0%, #00c4aa 100%)" }}
+              className="btn btn-primary btn-lg group"
             >
-              <motion.div
-                className="absolute inset-0"
-                style={{ background: "linear-gradient(135deg, #7ffff0 0%, #00f5d4 100%)" }}
-                initial={{ opacity: 0 }}
-                whileHover={{ opacity: 1 }}
-                transition={{ duration: 0.2 }}
-              />
-              <Globe className="relative w-5 h-5" />
-              <span className="relative">Create My Trip</span>
-              <ArrowRight className="relative w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <Sparkles className="w-4 h-4" />
+              Start planning free
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </motion.button>
           </Link>
-
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-2 px-8 py-4 rounded-2xl font-medium text-white/70 glass hover:text-[#00f5d4] transition-colors border border-white/10 hover:border-[#00f5d4]/30"
+          <button
+            onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
+            className="btn btn-outline btn-lg"
           >
             See how it works
-          </motion.button>
+          </button>
+        </motion.div>
+
+        {/* Trip preview card */}
+        <motion.div
+          variants={fade} initial="hidden" animate="show" custom={4}
+          className="relative"
+        >
+          {/* Main card */}
+          <div className="max-w-lg mx-auto bg-white rounded-2xl border border-slate-200 shadow-[0_4px_24px_rgba(0,0,0,0.06)] overflow-hidden">
+            {/* Browser chrome dots */}
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-50 border border-slate-100 px-3 py-1 rounded-lg">
+                <Zap className="w-3 h-3 text-[#14b8a6]" />
+                Generating your itinerary…
+              </div>
+              <div className="w-14" />
+            </div>
+
+            <div className="p-5 space-y-2.5">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="font-bold text-[#0f172a] text-lg">Tokyo, Japan</p>
+                  <p className="text-slate-400 text-xs mt-0.5">7 days · Adventure · $3,200</p>
+                </div>
+                <span className="teal-tag">Generated ✓</span>
+              </div>
+
+              {[
+                { day: "Day 1", name: "Senso-ji Temple",     time: "09:00", cost: "Free" },
+                { day: "Day 2", name: "Tsukiji Market Tour", time: "11:00", cost: "$45" },
+                { day: "Day 3", name: "Hakone Ropeway",      time: "07:00", cost: "$80" },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.75 + i * 0.12, duration: 0.35 }}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-[#0f172a] flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-xs font-bold">{i + 1}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[#0f172a] truncate">{item.name}</p>
+                    <p className="text-xs text-slate-400">{item.day} · {item.time}</p>
+                  </div>
+                  <span className="text-xs font-medium text-slate-400 flex-shrink-0">{item.cost}</span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Floating mini cards */}
+          {FLOAT_CARDS.map((card, i) => (
+            <motion.div
+              key={card.label}
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.1 + card.delay, duration: 0.4 }}
+              className={`absolute hidden lg:flex items-center gap-2.5 bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ${
+                i === 0 ? "-left-32 top-8" : i === 1 ? "-right-36 top-4" : "-right-28 bottom-8"
+              }`}
+            >
+              <span className="text-lg">{card.icon}</span>
+              <div>
+                <p className="text-xs font-semibold text-[#0f172a]">{card.label}</p>
+                <p className="text-xs text-slate-400">{card.sub}</p>
+              </div>
+            </motion.div>
+          ))}
         </motion.div>
 
         {/* Social proof */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.7 }}
-          className="mt-12 flex items-center justify-center gap-8 text-white/40 text-sm"
+          variants={fade} initial="hidden" animate="show" custom={6}
+          className="flex flex-wrap items-center justify-center gap-6 mt-12 text-sm text-slate-400"
         >
           <div className="flex items-center gap-2">
-            <div className="flex -space-x-2">
-              {["🌍", "✈️", "🏔️"].map((emoji, i) => (
-                <div key={i} className="w-8 h-8 rounded-full glass border border-white/10 flex items-center justify-center text-xs">
-                  {emoji}
+            <div className="flex -space-x-1.5">
+              {["🌍", "✈️", "🏔️", "🏝️"].map((e, i) => (
+                <div key={i} className="w-7 h-7 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-xs">
+                  {e}
                 </div>
               ))}
             </div>
             <span>10,000+ trips planned</span>
           </div>
-          <div className="hidden sm:block w-px h-4 bg-white/20" />
-          <div className="hidden sm:flex items-center gap-1">
+          <div className="w-px h-4 bg-slate-200" />
+          <div className="flex items-center gap-1">
             {"★★★★★".split("").map((s, i) => (
-              <span key={i} className="text-[#00f5d4] text-xs">{s}</span>
+              <span key={i} className="text-amber-400 text-xs">{s}</span>
             ))}
-            <span className="ml-1">4.9/5</span>
+            <span className="ml-1.5">4.9 / 5</span>
+          </div>
+          <div className="w-px h-4 bg-slate-200" />
+          <div className="flex items-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5 text-slate-400" />
+            <span>195 countries covered</span>
           </div>
         </motion.div>
-      </motion.div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-      >
-        <span className="text-white/30 text-xs uppercase tracking-widest">Scroll</span>
-        <motion.div
-          className="w-px h-8 bg-gradient-to-b from-[#00f5d4]/50 to-transparent"
-          animate={{ scaleY: [0, 1, 0], originY: 0 }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </motion.div>
+      </div>
     </section>
   );
 }

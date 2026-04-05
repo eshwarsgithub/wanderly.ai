@@ -1,0 +1,9 @@
+{
+  "name": "wanderly-ai-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix wanderlytrip-ai",
+    "build": "npm run build --prefix wanderlytrip-ai",
+    "lint": "npm run lint --prefix wanderlytrip-ai"
+  }
+}

@@ -17,7 +17,7 @@ export default function BudgetTracker({ itinerary }: BudgetTrackerProps) {
   const pct = Math.min((totalSpent / totalBudget) * 100, 100);
 
   const barColor =
-    pct < 60 ? "#00f5d4" : pct < 85 ? "#fbbf24" : "#f87171";
+    pct < 60 ? "#00c4aa" : pct < 85 ? "#f59e0b" : "#ef4444";
 
   if (!isOpen) {
     return (
@@ -25,10 +25,9 @@ export default function BudgetTracker({ itinerary }: BudgetTrackerProps) {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-2xl flex items-center justify-center teal-glow"
-        style={{ background: "linear-gradient(135deg, #00f5d4, #00c4aa)" }}
+        className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-2xl flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all"
       >
-        <DollarSign className="w-6 h-6 text-[#0a0a0a]" />
+        <DollarSign className="w-5 h-5 text-[#00a896]" />
       </motion.button>
     );
   }
@@ -37,17 +36,17 @@ export default function BudgetTracker({ itinerary }: BudgetTrackerProps) {
     <motion.div
       initial={{ x: 100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="fixed bottom-6 right-6 z-40 w-72 glass rounded-2xl p-5 teal-glow-sm"
+      className="fixed bottom-6 right-6 z-40 w-72 bg-white rounded-2xl border border-slate-200 shadow-lg p-5 max-w-[calc(100vw-2rem)]"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-[#00f5d4]" />
-          <span className="text-white font-semibold text-sm">Budget Tracker</span>
+          <TrendingUp className="w-4 h-4 text-[#00a896]" />
+          <span className="text-[#0f172a] font-semibold text-sm">Budget Tracker</span>
         </div>
         <button
           onClick={() => setIsOpen(false)}
-          className="text-white/30 hover:text-white/70 transition-colors"
+          className="text-slate-400 hover:text-slate-600 transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
@@ -57,52 +56,52 @@ export default function BudgetTracker({ itinerary }: BudgetTrackerProps) {
       <div className="mb-4">
         <div className="flex justify-between items-end mb-2">
           <div>
-            <p className="text-white/40 text-xs mb-1">Estimated spend</p>
-            <p className="text-2xl font-bold text-white">
+            <p className="text-slate-400 text-xs mb-1">Estimated spend</p>
+            <p className="text-2xl font-bold text-[#0f172a]">
               {currency} {totalSpent.toLocaleString()}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-white/40 text-xs mb-1">Total budget</p>
-            <p className="text-white/70 font-semibold">
+            <p className="text-slate-400 text-xs mb-1">Total budget</p>
+            <p className="text-slate-500 font-semibold text-sm">
               {currency} {totalBudget.toLocaleString()}
             </p>
           </div>
         </div>
 
         {/* Progress bar */}
-        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${pct}%` }}
             transition={{ duration: 1, ease: "easeOut" }}
             className="h-full rounded-full"
-            style={{ background: `linear-gradient(90deg, ${barColor}, ${barColor}99)` }}
+            style={{ background: barColor }}
           />
         </div>
-        <p className="text-right text-xs mt-1" style={{ color: barColor }}>
+        <p className="text-right text-xs mt-1 font-medium" style={{ color: barColor }}>
           {Math.round(pct)}% of budget
         </p>
       </div>
 
       {/* Per-day breakdown */}
       <div className="space-y-2">
-        <p className="text-white/40 text-xs uppercase tracking-widest mb-3">Per day</p>
+        <p className="text-slate-400 text-xs uppercase tracking-widest mb-3">Per day</p>
         {days.map((day, i) => {
           const dayPct = (day.dailyCost / (totalBudget / days.length)) * 100;
           return (
             <div key={day.day} className="flex items-center gap-3">
-              <span className="text-white/40 text-xs w-10 flex-shrink-0">Day {day.day}</span>
-              <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <span className="text-slate-400 text-xs w-10 flex-shrink-0">Day {day.day}</span>
+              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(dayPct, 100)}%` }}
                   transition={{ duration: 0.8, delay: i * 0.05 }}
-                  className="h-full rounded-full bg-[#00f5d4]"
-                  style={{ opacity: 0.6 + i * 0.05 }}
+                  className="h-full rounded-full"
+                  style={{ background: "#00c4aa", opacity: 0.6 + i * 0.05 }}
                 />
               </div>
-              <span className="text-white/60 text-xs w-16 text-right flex-shrink-0">
+              <span className="text-slate-500 text-xs w-16 text-right flex-shrink-0">
                 ${day.dailyCost}
               </span>
             </div>
@@ -111,8 +110,8 @@ export default function BudgetTracker({ itinerary }: BudgetTrackerProps) {
       </div>
 
       {totalSpent < totalBudget && (
-        <div className="mt-4 p-3 rounded-xl bg-[#00f5d4]/10 border border-[#00f5d4]/20">
-          <p className="text-[#00f5d4] text-xs font-medium">
+        <div className="mt-4 p-3 rounded-xl bg-[#f0fdfb] border border-[#99f6e4]">
+          <p className="text-[#007a6a] text-xs font-medium">
             ${(totalBudget - totalSpent).toLocaleString()} remaining for extras & shopping
           </p>
         </div>

@@ -9,7 +9,18 @@
       "Bash(claude mcp:*)",
       "Bash(npx skills:*)",
       "Bash(git checkout:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__list_migrations",
+      "Bash(xargs grep:*)",
+      "Bash(node -e \"require\\('zod'\\); console.log\\('zod ok'\\)\")",
+      "Bash(node -e \"require\\('nanoid'\\); console.log\\('ok'\\)\")",
+      "Bash(node -e \"require\\('@react-pdf/renderer'\\); console.log\\('pdf ok'\\)\")",
+      "mcp__magic__21st_magic_component_inspiration",
+      "mcp__magic__21st_magic_component_builder",
+      "mcp__magic__21st_magic_component_refiner"
     ]
   }
 }
