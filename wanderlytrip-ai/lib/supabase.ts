@@ -42,8 +42,12 @@ export async function signOut() {
 }
 
 export async function getUser() {
-  const { data: { user } } = await getSupabase().auth.getUser();
-  return user;
+  try {
+    const { data: { user } } = await getSupabase().auth.getUser();
+    return user;
+  } catch {
+    return null;
+  }
 }
 
 // Trip CRUD — uses `any` cast to work around strict generic inference on untyped schema

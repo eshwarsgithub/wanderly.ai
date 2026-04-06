@@ -237,3 +237,65 @@ export async function refineItinerary(
   const content = response.content as string;
   return parseItineraryJSON(content);
 }
+
+// Parse natural language into partial TripInput fields
+export async function parseNaturalLanguage(text: string): Promise<Partial<TripInput>> {
+  const model = new ChatAnthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    model: "claude-sonnet-4-6",
+    maxTokens: 512,
+    temperature: 0,
+  });
+
+  const response = await model.invoke([
+    new SystemMessage(
+      `Extract trip planning details from the user's text. Return ONLY a JSON object with any of these optional fields: destination, startDate (ISO), endDate (ISO), budget (number), travelers (number), vibe. Omit fields not mentioned.`
+    ),
+    new HumanMessage(text),
+  ]);
+
+  const content = response.content as string;
+  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) return {};
+  try {
+    return JSON.parse(jsonMatch[0]) as Partial<TripInput>;
+  } catch {
+    return {};
+  }
+}
+
+// Get alternative activities for a specific slot in the itinerary
+export async function getActivityAlternatives(
+  itinerary: GeneratedItinerary,
+  dayIndex: number,
+  activityId: string
+): Promise<Activity[]> {
+  const model = new ChatAnthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    model: "claude-sonnet-4-6",
+    maxTokens: 2000,
+    temperature: 0.9,
+  });
+
+  const day = itinerary.days[dayIndex];
+  const activity = day?.activities.find((a) => a.id === activityId);
+  if (!activity) return [];
+
+  const response = await model.invoke([
+    new SystemMessage(
+      `You are WanderlyTrip AI. Return ONLY a JSON array of 3 alternative activities for the given slot. Each must match the Activity schema exactly (same fields as the original). No markdown, just raw JSON array.`
+    ),
+    new HumanMessage(
+      `Destination: ${itinerary.destination}. Vibe: ${itinerary.vibe}. Day ${day.day} (${day.theme}). Replace this activity: ${JSON.stringify(activity)}. Budget per activity: ~$${activity.estimatedCost} USD. Return 3 alternatives as a JSON array.`
+    ),
+  ]);
+
+  const content = response.content as string;
+  const jsonMatch = content.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) return [];
+  try {
+    return JSON.parse(jsonMatch[0]) as Activity[];
+  } catch {
+    return [];
+  }
+}
