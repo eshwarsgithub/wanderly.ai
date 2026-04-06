@@ -5,5 +5,8 @@
     "dev": "npm run dev --prefix wanderlytrip-ai",
     "build": "npm run build --prefix wanderlytrip-ai",
     "lint": "npm run lint --prefix wanderlytrip-ai"
+  },
+  "devDependencies": {
+    "shadcn": "^4.1.2"
   }
 }

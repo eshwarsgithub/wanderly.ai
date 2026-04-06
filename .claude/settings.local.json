@@ -20,7 +20,8 @@
       "Bash(node -e \"require\\('@react-pdf/renderer'\\); console.log\\('pdf ok'\\)\")",
       "mcp__magic__21st_magic_component_inspiration",
       "mcp__magic__21st_magic_component_builder",
-      "mcp__magic__21st_magic_component_refiner"
+      "mcp__magic__21st_magic_component_refiner",
+      "Bash(npx shadcn@latest mcp init --client claude)"
     ]
   }
 }
