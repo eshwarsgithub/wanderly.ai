@@ -29,6 +29,10 @@ Thumbs.db
 .vscode/
 .idea/
 
+# MCP config (contains secrets)
+.mcp.json
+wanderlytrip-ai/.mcp.json
+
 # Misc
 *.log
 npm-debug.log*
