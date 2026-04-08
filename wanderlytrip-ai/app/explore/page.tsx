@@ -150,7 +150,7 @@ export default function ExplorePage() {
                 transition={{ delay: i * 0.06 }}
                 className="glass rounded-2xl overflow-hidden hover:border-[#00f5d4]/20 transition-colors flex flex-col">
 
-                <Link href={`/trip/share/${trip.share_slug}`} className="flex-1">
+                <Link href={`/trip/share/${trip.share_token}`} className="flex-1">
                   <div className="p-5">
                     <div className="flex items-start justify-between mb-4">
                       <div>
@@ -197,7 +197,7 @@ export default function ExplorePage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
-                      const url = `${window.location.origin}/trip/share/${trip.share_slug}`;
+                      const url = `${window.location.origin}/trip/share/${trip.share_token}`;
                       navigator.clipboard.writeText(url);
                     }}
                     className="w-8 h-8 rounded-xl flex items-center justify-center"

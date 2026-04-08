@@ -12,7 +12,7 @@ import LoadingAnimation from "@/components/LoadingAnimation";
 import { generateTripAction } from "@/app/actions/generate-itinerary";
 import type { DestinationStop } from "@/lib/ai-agent";
 
-export default function TripForm() {
+export default function TripForm({ defaultDestination = "" }: { defaultDestination?: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [loadingStep, setLoadingStep] = useState(0);
@@ -24,13 +24,19 @@ export default function TripForm() {
   ]);
 
   const [form, setForm] = useState({
-    destination: "",
+    destination: defaultDestination,
     startDate: "",
     endDate: "",
     budget: 3000,
     travelers: 2,
     vibe: "adventure",
   });
+
+  useEffect(() => {
+    if (defaultDestination) {
+      setForm((prev) => ({ ...prev, destination: defaultDestination }));
+    }
+  }, [defaultDestination]);
 
   function addStop() {
     if (stops.length < 4) setStops([...stops, { city: "", days: 2 }]);

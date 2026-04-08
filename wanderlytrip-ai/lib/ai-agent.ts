@@ -1,4 +1,4 @@
-import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { z } from "zod";
 
@@ -171,9 +171,9 @@ Rules:
 - totalBudget should be the sum of all daily costs`;
 
 export async function generateItinerary(input: TripInput): Promise<GeneratedItinerary> {
-  const model = new ChatAnthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-    model: "claude-sonnet-4-6",
+  const model = new ChatOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    model: "gpt-4o",
     maxTokens: 8000,
     temperature: 0.8,
   });
@@ -220,9 +220,9 @@ export async function refineItinerary(
   itinerary: GeneratedItinerary,
   userRequest: string
 ): Promise<GeneratedItinerary> {
-  const model = new ChatAnthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-    model: "claude-sonnet-4-6",
+  const model = new ChatOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    model: "gpt-4o",
     maxTokens: 8000,
     temperature: 0.7,
   });
@@ -240,9 +240,9 @@ export async function refineItinerary(
 
 // Parse natural language into partial TripInput fields
 export async function parseNaturalLanguage(text: string): Promise<Partial<TripInput>> {
-  const model = new ChatAnthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-    model: "claude-sonnet-4-6",
+  const model = new ChatOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    model: "gpt-4o-mini",
     maxTokens: 512,
     temperature: 0,
   });
@@ -270,9 +270,9 @@ export async function getActivityAlternatives(
   dayIndex: number,
   activityId: string
 ): Promise<Activity[]> {
-  const model = new ChatAnthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-    model: "claude-sonnet-4-6",
+  const model = new ChatOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    model: "gpt-4o",
     maxTokens: 2000,
     temperature: 0.9,
   });

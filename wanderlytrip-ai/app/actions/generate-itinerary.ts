@@ -24,8 +24,8 @@ export async function generateTripAction(
   input: TripInput
 ): Promise<GenerateResult | GenerateError> {
   try {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      throw new Error("ANTHROPIC_API_KEY is not configured. Add it to .env.local.");
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is not configured. Add it to .env.local.");
     }
     const itinerary = await generateItinerary(input);
     return { success: true, itinerary };
@@ -40,8 +40,8 @@ export async function refineTripAction(
   userRequest: string
 ): Promise<GenerateResult | GenerateError> {
   try {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      throw new Error("ANTHROPIC_API_KEY is not configured.");
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is not configured.");
     }
     const refined = await refineItinerary(itinerary, userRequest);
     return { success: true, itinerary: refined };
@@ -60,8 +60,8 @@ export async function parseNLAction(
   text: string
 ): Promise<ParseNLResult | GenerateError> {
   try {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      throw new Error("ANTHROPIC_API_KEY is not configured.");
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is not configured.");
     }
     const partial = await parseNaturalLanguage(text);
     return { success: true, partial };
@@ -82,8 +82,8 @@ export async function swapActivityAction(
   activityId: string
 ): Promise<SwapResult | GenerateError> {
   try {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      throw new Error("ANTHROPIC_API_KEY is not configured.");
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is not configured.");
     }
     const alternatives = await getActivityAlternatives(itinerary, dayIndex, activityId);
     return { success: true, alternatives };

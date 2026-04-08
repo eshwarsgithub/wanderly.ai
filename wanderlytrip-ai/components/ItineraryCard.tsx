@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, MapPin, DollarSign, Lightbulb, Timer } from "lucide-react";
+import { Clock, MapPin, DollarSign, Lightbulb, Timer, ExternalLink, GripVertical } from "lucide-react";
 import type { Activity } from "@/lib/ai-agent";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; border: string; label: string }> = {
@@ -12,13 +12,61 @@ const CATEGORY_STYLES: Record<string, { bg: string; text: string; border: string
   sightseeing:   { bg: "#fce7f3", text: "#9d174d", border: "#fbcfe8", label: "Sightseeing" },
 };
 
+// Categories that benefit from booking links
+const BOOKABLE = new Set(["food", "activity", "sightseeing"]);
+
 interface ItineraryCardProps {
   activity: Activity;
   index: number;
   isLast: boolean;
+  isDraggable?: boolean;
 }
 
-export default function ItineraryCard({ activity, index, isLast }: ItineraryCardProps) {
+function BookingLinks({ activity }: { activity: Activity }) {
+  if (!BOOKABLE.has(activity.category)) return null;
+
+  const query = encodeURIComponent(`${activity.name} ${activity.location}`);
+  const nameQuery = encodeURIComponent(activity.name);
+
+  const links = [
+    {
+      label: "Viator",
+      href: `https://www.viator.com/searchResults/all?text=${query}`,
+      color: "#189fc1",
+    },
+    {
+      label: "GetYourGuide",
+      href: `https://www.getyourguide.com/s/?q=${query}`,
+      color: "#FF5533",
+    },
+    {
+      label: "TripAdvisor",
+      href: `https://www.tripadvisor.com/Search?q=${nameQuery}`,
+      color: "#34e0a1",
+    },
+  ];
+
+  return (
+    <div className="mt-2.5 pt-2.5 border-t border-slate-50 flex items-center gap-1.5 flex-wrap">
+      <span className="text-slate-300 text-[10px] font-medium mr-1">Book:</span>
+      {links.map((link) => (
+        <a
+          key={link.label}
+          href={link.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold hover:opacity-80 transition-opacity"
+          style={{ background: link.color + "15", color: link.color, border: `1px solid ${link.color}30` }}
+        >
+          {link.label}
+          <ExternalLink className="w-2.5 h-2.5" />
+        </a>
+      ))}
+    </div>
+  );
+}
+
+export default function ItineraryCard({ activity, index, isLast, isDraggable = false }: ItineraryCardProps) {
   const cat = CATEGORY_STYLES[activity.category] ?? CATEGORY_STYLES.activity;
 
   return (
@@ -40,27 +88,34 @@ export default function ItineraryCard({ activity, index, isLast }: ItineraryCard
       </div>
 
       {/* Content */}
-      <div className={`flex-1 pb-4 ${isLast ? "" : ""}`}>
+      <div className="flex-1 pb-4">
         <div className="bg-white border border-slate-100 rounded-xl p-4 hover:border-slate-200 hover:shadow-sm transition-all duration-200">
-          {/* Header row */}
-          <div className="flex items-start justify-between gap-2 mb-2">
+          {/* Drag handle + header row */}
+          <div className="flex items-start gap-2 mb-2">
+            {isDraggable && (
+              <div className="flex-shrink-0 mt-0.5 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity">
+                <GripVertical className="w-4 h-4 text-slate-300" />
+              </div>
+            )}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span
-                  className="text-xs font-medium px-2 py-0.5 rounded-full"
-                  style={{ background: cat.bg, color: cat.text, border: `1px solid ${cat.border}` }}
-                >
-                  {cat.label}
-                </span>
-                <span className="text-xs text-slate-400 flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> {activity.time}
-                </span>
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span
+                    className="text-xs font-medium px-2 py-0.5 rounded-full"
+                    style={{ background: cat.bg, color: cat.text, border: `1px solid ${cat.border}` }}
+                  >
+                    {cat.label}
+                  </span>
+                  <span className="text-xs text-slate-400 flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> {activity.time}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-sm font-semibold text-[#0f172a] flex-shrink-0">
+                  <DollarSign className="w-3.5 h-3.5 text-slate-400" />
+                  {activity.estimatedCost}
+                </div>
               </div>
               <h4 className="font-semibold text-[#0f172a] text-sm leading-snug">{activity.name}</h4>
-            </div>
-            <div className="flex items-center gap-1 text-sm font-semibold text-[#0f172a] flex-shrink-0">
-              <DollarSign className="w-3.5 h-3.5 text-slate-400" />
-              {activity.estimatedCost}
             </div>
           </div>
 
@@ -70,10 +125,16 @@ export default function ItineraryCard({ activity, index, isLast }: ItineraryCard
           {/* Meta row */}
           <div className="flex items-center gap-3 text-xs text-slate-400 flex-wrap">
             {activity.location && (
-              <span className="flex items-center gap-1">
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activity.location)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 hover:text-[#00a896] transition-colors"
+              >
                 <MapPin className="w-3 h-3" />
                 {activity.location}
-              </span>
+                <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-70 transition-opacity" />
+              </a>
             )}
             {activity.duration && (
               <span className="flex items-center gap-1">
@@ -90,6 +151,9 @@ export default function ItineraryCard({ activity, index, isLast }: ItineraryCard
               <p className="text-xs text-slate-400 italic leading-relaxed">{activity.tips}</p>
             </div>
           )}
+
+          {/* Booking links */}
+          <BookingLinks activity={activity} />
         </div>
       </div>
     </motion.div>

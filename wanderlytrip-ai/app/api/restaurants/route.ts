@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { z } from "zod";
 
@@ -23,13 +23,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "destination is required" }, { status: 400 });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json({ error: "ANTHROPIC_API_KEY not configured" }, { status: 500 });
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json({ error: "OPENAI_API_KEY not configured" }, { status: 500 });
   }
 
-  const model = new ChatAnthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-    model: "claude-haiku-4-5-20251001", // Use Haiku for speed on this simpler task
+  const model = new ChatOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    model: "gpt-4o-mini",
     maxTokens: 2000,
     temperature: 0.7,
   });

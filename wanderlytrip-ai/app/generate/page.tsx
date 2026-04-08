@@ -1,7 +1,13 @@
 import Navbar from "@/components/Navbar";
 import TripForm from "@/components/TripForm";
 
-export default function GeneratePage() {
+export default async function GeneratePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ destination?: string }>;
+}) {
+  const { destination = "" } = await searchParams;
+
   return (
     <main className="min-h-screen">
       <Navbar />
@@ -18,7 +24,7 @@ export default function GeneratePage() {
             Claude AI will craft a complete, personalised itinerary tailored exactly to your vibe.
           </p>
         </div>
-        <TripForm />
+        <TripForm defaultDestination={destination} />
       </div>
     </main>
   );
