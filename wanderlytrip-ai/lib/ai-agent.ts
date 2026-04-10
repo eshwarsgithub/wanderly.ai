@@ -1,6 +1,7 @@
-import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { z } from "zod";
+import { getModelForTask } from "./model-router";
+import { normalizeContent } from "./parse-ai-json";
 
 // Structured schema for a single activity in the itinerary
 export interface Activity {
@@ -59,13 +60,44 @@ export interface TripInput {
 }
 
 // ── Zod schemas for runtime validation of AI output ──────────────────────────
+
+const VALID_CATEGORIES = ["food", "activity", "transport", "accommodation", "sightseeing"] as const;
+type ActivityCategory = typeof VALID_CATEGORIES[number];
+
+// Map common Gemini synonyms → canonical category
+const CATEGORY_MAP: Record<string, ActivityCategory> = {
+  food: "food", restaurant: "food", dining: "food", meal: "food", lunch: "food",
+  breakfast: "food", dinner: "food", cafe: "food", drink: "food", bar: "food",
+  activity: "activity", leisure: "activity", entertainment: "activity", shopping: "activity",
+  nature: "activity", adventure: "activity", sport: "activity", recreation: "activity",
+  beach: "activity", wellness: "activity", culture: "activity", nightlife: "activity",
+  transport: "transport", transit: "transport", travel: "transport", transfer: "transport",
+  accommodation: "accommodation", hotel: "accommodation", lodging: "accommodation",
+  hostel: "accommodation", stay: "accommodation", checkin: "accommodation",
+  sightseeing: "sightseeing", museum: "sightseeing", landmark: "sightseeing",
+  cultural: "sightseeing", tour: "sightseeing", historical: "sightseeing",
+  temple: "sightseeing", gallery: "sightseeing", monument: "sightseeing",
+};
+
+function coerceCategory(val: unknown): ActivityCategory {
+  if (typeof val === "string") {
+    const key = val.toLowerCase().replace(/[^a-z]/g, "");
+    if (CATEGORY_MAP[key]) return CATEGORY_MAP[key];
+    // Partial match fallback
+    for (const [k, v] of Object.entries(CATEGORY_MAP)) {
+      if (key.includes(k) || k.includes(key)) return v;
+    }
+  }
+  return "activity"; // safe default
+}
+
 const ActivitySchema = z.object({
   id: z.string(),
   time: z.string(),
   name: z.string(),
   description: z.string(),
   location: z.string(),
-  category: z.enum(["food", "activity", "transport", "accommodation", "sightseeing"]),
+  category: z.preprocess(coerceCategory, z.enum(VALID_CATEGORIES)),
   estimatedCost: z.number(),
   currency: z.string().default("USD"),
   duration: z.string(),
@@ -99,15 +131,43 @@ const GeneratedItinerarySchema = z.object({
   localCustoms: z.array(z.string()),
 });
 
+function extractJSON(content: string): string {
+  // 1. Strip Gemini/Claude thinking blocks (<thinking>...</thinking>)
+  let text = content.replace(/<thinking>[\s\S]*?<\/thinking>/gi, "").trim();
+
+  // 2. Strip markdown code fences: ```json ... ``` or ``` ... ```
+  const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) return fenceMatch[1].trim();
+
+  // 3. Extract the outermost JSON object
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start !== -1 && end !== -1 && end > start) {
+    return text.slice(start, end + 1);
+  }
+
+  throw new Error("AI returned invalid response format");
+}
+
 function parseItineraryJSON(content: string): GeneratedItinerary {
-  const jsonMatch = content.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("AI returned invalid response format");
+  let jsonStr: string;
+  try {
+    jsonStr = extractJSON(content);
+  } catch {
+    throw new Error("AI returned invalid response format");
+  }
 
   let raw: unknown;
   try {
-    raw = JSON.parse(jsonMatch[0]);
+    raw = JSON.parse(jsonStr);
   } catch {
-    throw new Error("AI returned malformed JSON");
+    // Last resort: try stripping trailing commas (common Gemini quirk)
+    try {
+      const cleaned = jsonStr.replace(/,\s*([}\]])/g, "$1");
+      raw = JSON.parse(cleaned);
+    } catch {
+      throw new Error("AI returned malformed JSON");
+    }
   }
 
   const result = GeneratedItinerarySchema.safeParse(raw);
@@ -171,12 +231,7 @@ Rules:
 - totalBudget should be the sum of all daily costs`;
 
 export async function generateItinerary(input: TripInput): Promise<GeneratedItinerary> {
-  const model = new ChatOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    model: "gpt-4o",
-    maxTokens: 8000,
-    temperature: 0.8,
-  });
+  const model = getModelForTask("main-itinerary", { maxTokens: 16000, temperature: 0.8 });
 
   const startDate = new Date(input.startDate);
   const endDate = new Date(input.endDate);
@@ -205,7 +260,7 @@ Generate the complete itinerary JSON now.`;
     new HumanMessage(userPrompt),
   ]);
 
-  const content = response.content as string;
+  const content = normalizeContent(response.content);
   const itinerary = parseItineraryJSON(content);
 
   if (!itinerary.id) {
@@ -220,12 +275,7 @@ export async function refineItinerary(
   itinerary: GeneratedItinerary,
   userRequest: string
 ): Promise<GeneratedItinerary> {
-  const model = new ChatOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    model: "gpt-4o",
-    maxTokens: 8000,
-    temperature: 0.7,
-  });
+  const model = getModelForTask("refinement", { maxTokens: 8000, temperature: 0.7 });
 
   const response = await model.invoke([
     new SystemMessage(SYSTEM_PROMPT),
@@ -234,18 +284,13 @@ export async function refineItinerary(
     ),
   ]);
 
-  const content = response.content as string;
+  const content = normalizeContent(response.content);
   return parseItineraryJSON(content);
 }
 
 // Parse natural language into partial TripInput fields
 export async function parseNaturalLanguage(text: string): Promise<Partial<TripInput>> {
-  const model = new ChatOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    model: "gpt-4o-mini",
-    maxTokens: 512,
-    temperature: 0,
-  });
+  const model = getModelForTask("helper", { maxTokens: 512, temperature: 0 });
 
   const response = await model.invoke([
     new SystemMessage(
@@ -254,11 +299,9 @@ export async function parseNaturalLanguage(text: string): Promise<Partial<TripIn
     new HumanMessage(text),
   ]);
 
-  const content = response.content as string;
-  const jsonMatch = content.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) return {};
   try {
-    return JSON.parse(jsonMatch[0]) as Partial<TripInput>;
+    const { parseAIObject } = await import("./parse-ai-json");
+    return parseAIObject<Partial<TripInput>>(response.content);
   } catch {
     return {};
   }
@@ -270,12 +313,7 @@ export async function getActivityAlternatives(
   dayIndex: number,
   activityId: string
 ): Promise<Activity[]> {
-  const model = new ChatOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    model: "gpt-4o",
-    maxTokens: 2000,
-    temperature: 0.9,
-  });
+  const model = getModelForTask("helper", { maxTokens: 2000, temperature: 0.9 });
 
   const day = itinerary.days[dayIndex];
   const activity = day?.activities.find((a) => a.id === activityId);
@@ -290,11 +328,9 @@ export async function getActivityAlternatives(
     ),
   ]);
 
-  const content = response.content as string;
-  const jsonMatch = content.match(/\[[\s\S]*\]/);
-  if (!jsonMatch) return [];
   try {
-    return JSON.parse(jsonMatch[0]) as Activity[];
+    const { parseAIArray } = await import("./parse-ai-json");
+    return parseAIArray<Activity>(response.content);
   } catch {
     return [];
   }

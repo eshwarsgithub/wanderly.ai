@@ -10,6 +10,14 @@ import {
   type Activity,
 } from "@/lib/ai-agent";
 
+function requireKey(): void {
+  if (!process.env.OPENROUTER_API_KEY) {
+    throw new Error(
+      "OPENROUTER_API_KEY is not configured. Add it to wanderlytrip-ai/.env.local and restart the server."
+    );
+  }
+}
+
 export interface GenerateResult {
   success: true;
   itinerary: GeneratedItinerary;
@@ -24,9 +32,7 @@ export async function generateTripAction(
   input: TripInput
 ): Promise<GenerateResult | GenerateError> {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is not configured. Add it to .env.local.");
-    }
+    requireKey();
     const itinerary = await generateItinerary(input);
     return { success: true, itinerary };
   } catch (err) {
@@ -40,9 +46,7 @@ export async function refineTripAction(
   userRequest: string
 ): Promise<GenerateResult | GenerateError> {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is not configured.");
-    }
+    requireKey();
     const refined = await refineItinerary(itinerary, userRequest);
     return { success: true, itinerary: refined };
   } catch (err) {
@@ -60,9 +64,7 @@ export async function parseNLAction(
   text: string
 ): Promise<ParseNLResult | GenerateError> {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is not configured.");
-    }
+    requireKey();
     const partial = await parseNaturalLanguage(text);
     return { success: true, partial };
   } catch (err) {
@@ -82,9 +84,7 @@ export async function swapActivityAction(
   activityId: string
 ): Promise<SwapResult | GenerateError> {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is not configured.");
-    }
+    requireKey();
     const alternatives = await getActivityAlternatives(itinerary, dayIndex, activityId);
     return { success: true, alternatives };
   } catch (err) {

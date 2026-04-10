@@ -107,7 +107,7 @@ export default function TransportTab({
       <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center">
         <Bus className="w-8 h-8 mx-auto mb-3 text-slate-300" />
         <p className="text-slate-500 text-sm font-medium mb-1">Transport guide unavailable</p>
-        <p className="text-slate-400 text-xs">Check your OPENAI_API_KEY environment variable.</p>
+        <p className="text-slate-400 text-xs">Check your OPENROUTER_API_KEY environment variable.</p>
       </div>
     );
   }

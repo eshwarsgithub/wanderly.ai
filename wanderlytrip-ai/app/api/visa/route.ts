@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { getModelForTask } from "@/lib/model-router";
+import { parseAIObject } from "@/lib/parse-ai-json";
 
 export async function GET(req: NextRequest) {
   const destination = req.nextUrl.searchParams.get("destination") ?? "";
   const passport = req.nextUrl.searchParams.get("passport") ?? "US";
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: "API key not set" }, { status: 500 });
+  if (!process.env.OPENROUTER_API_KEY) return NextResponse.json({ error: "API key not set" }, { status: 500 });
   if (!destination) return NextResponse.json({ error: "destination required" }, { status: 400 });
 
   try {
-    const llm = new ChatOpenAI({ apiKey, model: "gpt-4o-mini", temperature: 0, maxTokens: 600 });
+    const llm = getModelForTask("helper", { temperature: 0, maxTokens: 600 });
     const res = await llm.invoke([
       new SystemMessage("You are a visa expert. Return ONLY valid JSON, no markdown."),
       new HumanMessage(`Visa and entry requirements for a ${passport} passport holder visiting ${destination}.
@@ -31,8 +31,7 @@ Return JSON:
   "travelAdvisory": "<one sentence current travel advisory>"
 }`),
     ]);
-    const raw = typeof res.content === "string" ? res.content : JSON.stringify(res.content);
-    const data = JSON.parse(raw.replace(/```json\n?|```/g, "").trim());
+    const data = parseAIObject(res.content);
     return NextResponse.json(data);
   } catch {
     return NextResponse.json({ error: "Failed to fetch visa info" }, { status: 500 });

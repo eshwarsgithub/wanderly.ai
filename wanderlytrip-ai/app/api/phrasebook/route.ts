@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { getModelForTask } from "@/lib/model-router";
+import { parseAIObject } from "@/lib/parse-ai-json";
 
 export async function GET(req: NextRequest) {
   const destination = req.nextUrl.searchParams.get("destination");
   if (!destination) return NextResponse.json({ error: "destination required" }, { status: 400 });
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: "API key not configured" }, { status: 500 });
-
   try {
-    const llm = new ChatOpenAI({ apiKey, model: "gpt-4o-mini", temperature: 0 });
+    const llm = getModelForTask("helper", { temperature: 0 });
     const res = await llm.invoke([
       new SystemMessage("You are a travel language assistant. Return ONLY valid JSON, no markdown fences."),
       new HumanMessage(`Generate a travel phrasebook for someone visiting ${destination}.
@@ -48,9 +46,7 @@ Return JSON with this exact shape:
 }`),
     ]);
 
-    const raw = typeof res.content === "string" ? res.content : JSON.stringify(res.content);
-    const cleaned = raw.replace(/```json\n?|```/g, "").trim();
-    const data = JSON.parse(cleaned);
+    const data = parseAIObject(res.content);
     return NextResponse.json(data);
   } catch {
     return NextResponse.json({ error: "Failed to generate phrasebook" }, { status: 500 });

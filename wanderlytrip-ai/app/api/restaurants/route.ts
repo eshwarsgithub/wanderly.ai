@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { getModelForTask } from "@/lib/model-router";
+import { parseAIArray } from "@/lib/parse-ai-json";
 import { z } from "zod";
 
 const RestaurantSchema = z.object({
@@ -23,16 +24,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "destination is required" }, { status: 400 });
   }
 
-  if (!process.env.OPENAI_API_KEY) {
-    return NextResponse.json({ error: "OPENAI_API_KEY not configured" }, { status: 500 });
+  if (!process.env.OPENROUTER_API_KEY) {
+    return NextResponse.json({ error: "OPENROUTER_API_KEY not configured" }, { status: 500 });
   }
 
-  const model = new ChatOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    model: "gpt-4o-mini",
-    maxTokens: 2000,
-    temperature: 0.7,
-  });
+  const model = getModelForTask("helper", { maxTokens: 2000, temperature: 0.7 });
 
   const response = await model.invoke([
     new SystemMessage(
@@ -42,14 +38,9 @@ export async function GET(req: NextRequest) {
   ]);
 
   try {
-    const content = response.content as string;
-    const jsonMatch = content.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) throw new Error("No JSON array found");
-
-    const parsed = JSON.parse(jsonMatch[0]);
+    const parsed = parseAIArray(response.content);
     const result = RestaurantArraySchema.safeParse(parsed);
     if (!result.success) throw new Error("Invalid restaurant data from AI");
-
     return NextResponse.json(result.data);
   } catch {
     return NextResponse.json({ error: "Failed to generate restaurant recommendations" }, { status: 500 });

@@ -1,5 +1,5 @@
-import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { getModelForTask } from "./model-router";
 
 export interface DestinationGuide {
   destination: string;
@@ -15,11 +15,8 @@ export interface DestinationGuide {
 }
 
 export async function getDestinationGuide(destination: string): Promise<DestinationGuide | null> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return null;
-
   try {
-    const llm = new ChatOpenAI({ apiKey, model: "gpt-4o-mini", temperature: 0 });
+    const llm = getModelForTask("helper", { temperature: 0 });
     const res = await llm.invoke([
       new SystemMessage("You are a travel expert. Return ONLY valid JSON, no markdown fences."),
       new HumanMessage(`Generate a concise travel guide for ${destination}.
