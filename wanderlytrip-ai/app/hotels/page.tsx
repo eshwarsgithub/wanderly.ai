@@ -2,23 +2,34 @@
 
 import { useState, useTransition } from "react";
 import { motion } from "framer-motion";
-import { Building2, Star, MapPin, Search, DollarSign, ArrowRight } from "lucide-react";
+import { Building2, Star, MapPin, Search, DollarSign, ArrowRight, AlertCircle, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import type { HotelOffer } from "@/lib/amadeus";
+
+interface SearchResult {
+  hotels: HotelOffer[];
+  demo: boolean;
+  error?: string;
+}
 
 async function searchHotelsAction(params: {
   cityCode: string;
   checkIn: string;
   checkOut: string;
   adults: number;
-}): Promise<HotelOffer[]> {
+}): Promise<SearchResult> {
   const res = await fetch(
     `/api/hotels?cityCode=${params.cityCode}&checkIn=${params.checkIn}&checkOut=${params.checkOut}&adults=${params.adults}`
   );
-  if (!res.ok) return [];
-  return res.json();
+  const demo = res.headers.get("X-Demo-Mode") === "1";
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    return { hotels: [], demo: false, error: body.error || "Failed to search hotels" };
+  }
+  const hotels = await res.json();
+  return { hotels, demo };
 }
 
 function bookingUrl(hotelName: string, city: string, checkIn: string, checkOut: string): string {
@@ -50,14 +61,26 @@ export default function HotelsPage() {
   const [isPending, startTransition] = useTransition();
   const [hotels, setHotels] = useState<HotelOffer[]>([]);
   const [searched, setSearched] = useState(false);
+  const [isDemo, setIsDemo] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({ cityCode: "", checkIn: "", checkOut: "", adults: 2 });
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+    setIsDemo(false);
     startTransition(async () => {
-      const results = await searchHotelsAction(form);
-      setHotels(results);
-      setSearched(true);
+      try {
+        const result = await searchHotelsAction(form);
+        setHotels(result.hotels);
+        setIsDemo(result.demo);
+        setError(result.error ?? null);
+      } catch (err) {
+        setHotels([]);
+        setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      } finally {
+        setSearched(true);
+      }
     });
   }
 
@@ -111,10 +134,33 @@ export default function HotelsPage() {
           </motion.button>
         </form>
 
+        {/* Error state */}
+        {!isPending && error && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="flex items-start gap-3 p-4 mb-6 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </motion.div>
+        )}
+
+        {/* Demo mode banner */}
+        {!isPending && isDemo && hotels.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 px-4 py-3 mb-5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">
+            <Sparkles className="w-4 h-4 flex-shrink-0" />
+            <span>
+              <strong>AI-generated demo data</strong> — Add your{" "}
+              <a href="https://developers.amadeus.com" target="_blank" rel="noopener noreferrer"
+                className="underline font-medium">Amadeus API keys</a>{" "}
+              to <code className="text-xs bg-amber-100 px-1 py-0.5 rounded">.env.local</code> for live availability.
+            </span>
+          </motion.div>
+        )}
+
         {/* Popular cities — shown before first search */}
         {!searched && !isPending && (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <p className="text-white/40 text-xs uppercase tracking-widest mb-3 font-medium">Popular destinations</p>
+            <p className="text-slate-400 text-xs uppercase tracking-widest mb-3 font-medium">Popular destinations</p>
             <div className="flex flex-wrap gap-2">
               {[
                 { code: "TYO", label: "Tokyo" },
@@ -132,9 +178,9 @@ export default function HotelsPage() {
                   whileTap={{ scale: 0.97 }}
                   type="button"
                   onClick={() => setForm((f) => ({ ...f, cityCode: city.code }))}
-                  className="flex items-center gap-2 px-4 py-2 glass rounded-xl text-sm text-white/60 hover:text-white hover:border-[#00f5d4]/30 transition-all"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-slate-500 border border-slate-200 bg-white hover:text-[#0f172a] hover:border-slate-300 transition-all"
                 >
-                  <MapPin className="w-3 h-3 text-[#00f5d4]" />
+                  <MapPin className="w-3 h-3 text-[#00a896]" />
                   {city.label}
                 </motion.button>
               ))}
@@ -149,7 +195,7 @@ export default function HotelsPage() {
           </div>
         )}
 
-        {!isPending && searched && hotels.length === 0 && (
+        {!isPending && searched && hotels.length === 0 && !error && (
           <div className="text-center py-16">
             <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
               <Building2 className="w-7 h-7 text-slate-300" />

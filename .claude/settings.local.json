@@ -21,7 +21,21 @@
       "mcp__magic__21st_magic_component_inspiration",
       "mcp__magic__21st_magic_component_builder",
       "mcp__magic__21st_magic_component_refiner",
-      "Bash(npx shadcn@latest mcp init --client claude)"
+      "Bash(npx shadcn@latest mcp init --client claude)",
+      "Bash(node -e \"const p = require\\('./node_modules/next/package.json'\\); console.log\\(p.version\\)\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(taskkill /PID 31260 /F)",
+      "Bash(curl -s -o /dev/null -w \"HTTP:%{http_code}\" http://localhost:3000)",
+      "Bash(cmd:*)",
+      "Bash(npm list:*)",
+      "Bash(echo \"Dev server PID: $!\")",
+      "Bash(curl -s http://localhost:3000 -o /dev/null -w \"HTTP: %{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:3000/api/restaurants?destination=Tokyo\" -w \"\\\\nHTTP: %{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:3000/api/flights?origin=JFK&destination=NRT&date=2025-06-01&adults=1\" -v)",
+      "Bash(curl:*)",
+      "Bash(python3 -c \"import sys,json; data=sys.stdin.read\\(\\); parts=data.rsplit\\('\\\\n',1\\); body=parts[0]; status=parts[1]; parsed=json.loads\\(body\\); print\\(f'{status} | {len\\(parsed\\)} results | first: {parsed[0][\\\\\"name\\\\\"]} \\({parsed[0][\\\\\"cuisine\\\\\"]}\\)'\\)\")",
+      "Bash(python3 -c \"import sys,json; data=sys.stdin.read\\(\\); parts=data.rsplit\\('\\\\n',1\\); body=parts[0]; status=parts[1]; parsed=json.loads\\(body\\); print\\(f'{status} | {len\\(parsed\\)} flights | first: {parsed[0][\\\\\"itineraries\\\\\"][0][\\\\\"segments\\\\\"][0][\\\\\"carrierCode\\\\\"]} \\\\${parsed[0][\\\\\"price\\\\\"][\\\\\"total\\\\\"]}'\\)\")",
+      "Bash(python3 -c \"import sys,json; data=sys.stdin.read\\(\\); parts=data.rsplit\\('\\\\n',1\\); body=parts[0]; status=parts[1]; parsed=json.loads\\(body\\); print\\(f'{status} | {len\\(parsed\\)} hotels | first: {parsed[0][\\\\\"hotel\\\\\"][\\\\\"name\\\\\"]} \\\\${parsed[0][\\\\\"offers\\\\\"][0][\\\\\"price\\\\\"][\\\\\"total\\\\\"]}'\\)\")"
     ]
   }
 }

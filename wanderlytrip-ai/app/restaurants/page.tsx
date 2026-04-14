@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { motion } from "framer-motion";
-import { UtensilsCrossed, Search, Star, MapPin, ArrowRight } from "lucide-react";
+import { UtensilsCrossed, Search, Star, MapPin, ArrowRight, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar";
 
@@ -52,18 +52,30 @@ export default function RestaurantsPage() {
   const [isPending, startTransition] = useTransition();
   const [searched, setSearched] = useState(false);
   const [currentDestination, setCurrentDestination] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     const dest = destination.trim();
+    setError(null);
     startTransition(async () => {
-      const res = await fetch(`/api/restaurants?destination=${encodeURIComponent(dest)}`);
-      if (res.ok) {
-        const data = await res.json();
-        setRestaurants(data);
-        setCurrentDestination(dest);
+      try {
+        const res = await fetch(`/api/restaurants?destination=${encodeURIComponent(dest)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setRestaurants(data);
+          setCurrentDestination(dest);
+        } else {
+          const body = await res.json().catch(() => ({}));
+          setError(body.error || "Failed to load restaurant recommendations");
+          setRestaurants([]);
+        }
+      } catch (err) {
+        setRestaurants([]);
+        setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      } finally {
+        setSearched(true);
       }
-      setSearched(true);
     });
   }
 
@@ -92,6 +104,15 @@ export default function RestaurantsPage() {
           </motion.button>
         </form>
 
+        {/* Error state */}
+        {!isPending && error && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="flex items-start gap-3 p-4 mb-6 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </motion.div>
+        )}
+
         {/* Skeletons */}
         {isPending && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -99,7 +120,7 @@ export default function RestaurantsPage() {
           </div>
         )}
 
-        {!isPending && searched && restaurants.length === 0 && (
+        {!isPending && searched && restaurants.length === 0 && !error && (
           <div className="text-center py-16">
             <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
               <UtensilsCrossed className="w-7 h-7 text-slate-300" />

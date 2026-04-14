@@ -23,17 +23,21 @@ export default function AuthPage() {
     setError(null);
 
     startTransition(async () => {
-      const action = mode === "login" ? signIn : signUp;
-      const { error: authError } = await action(email, password);
+      try {
+        const action = mode === "login" ? signIn : signUp;
+        const { error: authError } = await action(email, password);
 
-      if (authError) {
-        setError(authError.message);
-        return;
+        if (authError) {
+          setError(authError.message ?? "Authentication failed");
+          return;
+        }
+
+        const returnUrl = sessionStorage.getItem("returnUrl");
+        sessionStorage.removeItem("returnUrl");
+        router.push(returnUrl || "/saved");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       }
-
-      const returnUrl = sessionStorage.getItem("returnUrl");
-      sessionStorage.removeItem("returnUrl");
-      router.push(returnUrl || "/saved");
     });
   }
 

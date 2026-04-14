@@ -2,23 +2,34 @@
 
 import { useState, useTransition } from "react";
 import { motion } from "framer-motion";
-import { Plane, ArrowRight, Clock, Users, Search } from "lucide-react";
+import { Plane, ArrowRight, Clock, Users, Search, AlertCircle, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import type { FlightOffer } from "@/lib/amadeus";
+
+interface SearchResult {
+  flights: FlightOffer[];
+  demo: boolean;
+  error?: string;
+}
 
 async function searchFlightsAction(params: {
   origin: string;
   destination: string;
   date: string;
   adults: number;
-}): Promise<FlightOffer[]> {
+}): Promise<SearchResult> {
   const res = await fetch(
     `/api/flights?origin=${params.origin}&destination=${params.destination}&date=${params.date}&adults=${params.adults}`
   );
-  if (!res.ok) return [];
-  return res.json();
+  const demo = res.headers.get("X-Demo-Mode") === "1";
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    return { flights: [], demo: false, error: body.error || "Failed to search flights" };
+  }
+  const flights = await res.json();
+  return { flights, demo };
 }
 
 function skyscannerUrl(origin: string, destination: string, date: string): string {
@@ -53,14 +64,26 @@ export default function FlightsPage() {
   const [isPending, startTransition] = useTransition();
   const [flights, setFlights] = useState<FlightOffer[]>([]);
   const [searched, setSearched] = useState(false);
+  const [isDemo, setIsDemo] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({ origin: "", destination: "", date: "", adults: 1 });
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+    setIsDemo(false);
     startTransition(async () => {
-      const results = await searchFlightsAction(form);
-      setFlights(results);
-      setSearched(true);
+      try {
+        const result = await searchFlightsAction(form);
+        setFlights(result.flights);
+        setIsDemo(result.demo);
+        setError(result.error ?? null);
+      } catch (err) {
+        setFlights([]);
+        setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      } finally {
+        setSearched(true);
+      }
     });
   }
 
@@ -116,6 +139,29 @@ export default function FlightsPage() {
           </motion.button>
         </form>
 
+        {/* Error state */}
+        {!isPending && error && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="flex items-start gap-3 p-4 mb-6 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </motion.div>
+        )}
+
+        {/* Demo mode banner */}
+        {!isPending && isDemo && flights.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 px-4 py-3 mb-5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">
+            <Sparkles className="w-4 h-4 flex-shrink-0" />
+            <span>
+              <strong>AI-generated demo data</strong> — Add your{" "}
+              <a href="https://developers.amadeus.com" target="_blank" rel="noopener noreferrer"
+                className="underline font-medium">Amadeus API keys</a>{" "}
+              to <code className="text-xs bg-amber-100 px-1 py-0.5 rounded">.env.local</code> for live prices.
+            </span>
+          </motion.div>
+        )}
+
         {/* Skeletons while loading */}
         {isPending && (
           <div className="space-y-4">
@@ -124,7 +170,7 @@ export default function FlightsPage() {
         )}
 
         {/* Empty state */}
-        {!isPending && searched && flights.length === 0 && (
+        {!isPending && searched && flights.length === 0 && !error && (
           <div className="text-center py-16">
             <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
               <Plane className="w-7 h-7 text-slate-300" />

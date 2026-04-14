@@ -28,21 +28,22 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "OPENROUTER_API_KEY not configured" }, { status: 500 });
   }
 
-  const model = getModelForTask("helper", { maxTokens: 2000, temperature: 0.7 });
-
-  const response = await model.invoke([
-    new SystemMessage(
-      `You are a food critic and travel expert. Return ONLY valid JSON — an array of 6 restaurant recommendations. Each object must have: name, cuisine, priceRange ($|$$|$$$|$$$$), rating (1-5 integer), neighborhood, mustTry, vibe, tip.`
-    ),
-    new HumanMessage(`Give me the 6 best restaurants in ${destination}. Return raw JSON array only, no markdown.`),
-  ]);
-
   try {
+    const model = getModelForTask("helper", { maxTokens: 2000, temperature: 0.7 });
+
+    const response = await model.invoke([
+      new SystemMessage(
+        `You are a food critic and travel expert. Return ONLY valid JSON — an array of 6 restaurant recommendations. Each object must have: name, cuisine, priceRange ($|$$|$$$|$$$$), rating (1-5 integer), neighborhood, mustTry, vibe, tip.`
+      ),
+      new HumanMessage(`Give me the 6 best restaurants in ${destination}. Return raw JSON array only, no markdown.`),
+    ]);
+
     const parsed = parseAIArray(response.content);
     const result = RestaurantArraySchema.safeParse(parsed);
     if (!result.success) throw new Error("Invalid restaurant data from AI");
     return NextResponse.json(result.data);
-  } catch {
-    return NextResponse.json({ error: "Failed to generate restaurant recommendations" }, { status: 500 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Failed to generate restaurant recommendations";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

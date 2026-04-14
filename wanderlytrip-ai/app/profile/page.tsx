@@ -60,9 +60,13 @@ export default function ProfilePage() {
     e.preventDefault();
     if (!userId) return;
     startTransition(async () => {
-      await saveProfile({ ...form, id: userId });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      try {
+        await saveProfile({ ...form, id: userId });
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      } catch (err) {
+        console.error("Failed to save profile:", err);
+      }
     });
   }
 

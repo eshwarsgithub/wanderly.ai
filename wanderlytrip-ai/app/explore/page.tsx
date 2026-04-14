@@ -25,6 +25,7 @@ export default function ExplorePage() {
   const [destination, setDestination] = useState("");
   const [vibe, setVibe] = useState("");
   const [durationIdx, setDurationIdx] = useState(0);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   function fetchTrips() {
     const dur = DURATIONS[durationIdx];
@@ -34,9 +35,15 @@ export default function ExplorePage() {
       minDays: dur.min,
       maxDays: dur.max,
     };
+    setFetchError(null);
     startTransition(async () => {
-      const data = await loadPublicTrips(filters);
-      setTrips(data);
+      try {
+        const data = await loadPublicTrips(filters);
+        setTrips(data);
+      } catch (err) {
+        setTrips([]);
+        setFetchError(err instanceof Error ? err.message : "Failed to load trips");
+      }
     });
   }
 
@@ -48,6 +55,14 @@ export default function ExplorePage() {
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     fetchTrips();
+  }
+
+  function handleForkTrip(trip: TripRecord) {
+    try {
+      forkTrip(trip);
+    } catch {
+      // silently ignore fork errors — navigation will handle it
+    }
   }
 
   function forkTrip(trip: TripRecord) {
@@ -127,8 +142,16 @@ export default function ExplorePage() {
           </div>
         )}
 
+        {/* Error state */}
+        {!isPending && fetchError && (
+          <div className="text-center py-16">
+            <Globe className="w-10 h-10 text-red-400/60 mx-auto mb-4" />
+            <p className="text-white/60 font-medium">{fetchError}</p>
+          </div>
+        )}
+
         {/* Empty state */}
-        {!isPending && trips.length === 0 && (
+        {!isPending && !fetchError && trips.length === 0 && (
           <div className="text-center py-20">
             <Globe className="w-12 h-12 text-white/20 mx-auto mb-4" />
             <h3 className="text-white text-xl font-semibold mb-2">No public trips yet</h3>
@@ -143,14 +166,14 @@ export default function ExplorePage() {
         )}
 
         {/* Trip cards */}
-        {!isPending && trips.length > 0 && (
+        {!isPending && !fetchError && trips.length > 0 && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {trips.map((trip, i) => (
               <motion.div key={trip.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06 }}
                 className="glass rounded-2xl overflow-hidden hover:border-[#00f5d4]/20 transition-colors flex flex-col">
 
-                <Link href={`/trip/share/${trip.share_token}`} className="flex-1">
+                <Link href={`/trip/share/${trip.share_slug}`} className="flex-1">
                   <div className="p-5">
                     <div className="flex items-start justify-between mb-4">
                       <div>
@@ -186,7 +209,7 @@ export default function ExplorePage() {
                   <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => forkTrip(trip)}
+                    onClick={() => handleForkTrip(trip)}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold text-[#0a0a0a]"
                     style={{ background: "linear-gradient(135deg, #00f5d4, #00c4aa)" }}
                   >
@@ -197,7 +220,7 @@ export default function ExplorePage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
-                      const url = `${window.location.origin}/trip/share/${trip.share_token}`;
+                      const url = `${window.location.origin}/trip/share/${trip.share_slug}`;
                       navigator.clipboard.writeText(url);
                     }}
                     className="w-8 h-8 rounded-xl flex items-center justify-center"

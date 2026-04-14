@@ -26,7 +26,7 @@ export interface TripRecord {
   end_date: string;
   itinerary: GeneratedItinerary;
   created_at: string;
-  share_token?: string;
+  share_slug?: string;
   is_public?: boolean;
 }
 
@@ -148,12 +148,21 @@ export async function loadPublicTrips(filter: PublicTripsFilter = {}): Promise<T
 
   if (filter.vibe) query = query.eq("vibe", filter.vibe);
   if (filter.destination) query = query.ilike("destination", `%${filter.destination}%`);
-  if (filter.minDays !== undefined) query = query.gte("total_days", filter.minDays);
-  if (filter.maxDays !== undefined) query = query.lte("total_days", filter.maxDays);
 
   const { data, error } = await query;
   if (error) return [];
-  return (data ?? []) as TripRecord[];
+
+  let results = (data ?? []) as TripRecord[];
+
+  // Filter by days client-side — totalDays lives inside the itinerary JSONB
+  if (filter.minDays !== undefined) {
+    results = results.filter((t) => (t.itinerary?.totalDays ?? 0) >= filter.minDays!);
+  }
+  if (filter.maxDays !== undefined) {
+    results = results.filter((t) => (t.itinerary?.totalDays ?? 0) <= filter.maxDays!);
+  }
+
+  return results;
 }
 
 // Load a shared trip by its slug/share_token
@@ -206,14 +215,14 @@ export async function removeCollaborator(collaboratorId: string) {
 // Generate a unique share token and make the trip public
 export async function shareTrip(tripId: string): Promise<string> {
   const { nanoid } = await import("nanoid");
-  const token = nanoid(12);
+  const slug = nanoid(12);
   const db = getSupabase();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (db.from("trips") as any)
-    .update({ share_token: token, is_public: true })
+    .update({ share_slug: slug, is_public: true })
     .eq("id", tripId);
   if (error) throw error;
-  return token;
+  return slug;
 }
 
 // Load a trip by its public share token (no auth required — RLS allows public reads)
@@ -222,7 +231,7 @@ export async function loadTripByToken(token: string): Promise<TripRecord | null>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (db.from("trips") as any)
     .select("*")
-    .eq("share_token", token)
+    .eq("share_slug", token)
     .eq("is_public", true)
     .single();
   if (error) return null;
