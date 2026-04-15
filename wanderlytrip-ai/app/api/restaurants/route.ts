@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { getModelForTask } from "@/lib/model-router";
 import { parseAIArray } from "@/lib/parse-ai-json";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { z } from "zod";
 
 const RestaurantSchema = z.object({
@@ -18,6 +19,10 @@ const RestaurantSchema = z.object({
 const RestaurantArraySchema = z.array(RestaurantSchema);
 
 export async function GET(req: NextRequest) {
+  if (!rateLimit(getClientIp(req))) {
+    return NextResponse.json({ error: "Too many requests — try again in a minute" }, { status: 429 });
+  }
+
   const destination = req.nextUrl.searchParams.get("destination");
 
   if (!destination) {

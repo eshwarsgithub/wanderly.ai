@@ -2,9 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { getModelForTask } from "@/lib/model-router";
 import { parseAIArray } from "@/lib/parse-ai-json";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import type { WeatherDay } from "@/lib/weather";
 
 export async function POST(req: NextRequest) {
+  if (!rateLimit(getClientIp(req))) {
+    return NextResponse.json({ advisory: [], packingAdditions: [] }, { status: 429 });
+  }
+
   if (!process.env.OPENROUTER_API_KEY) return NextResponse.json({ advisory: [], packingAdditions: [] });
 
   let body: { weatherDays: WeatherDay[]; destination: string };

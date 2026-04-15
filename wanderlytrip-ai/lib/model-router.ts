@@ -8,9 +8,6 @@ const OPENROUTER_BASE = "https://openrouter.ai/api/v1";
 //   main-itinerary → Gemini 2.5 Pro     (~$0.04–0.10/call) — best structured JSON, large context
 //   refinement     → Gemini 2.0 Flash   (~$0.01–0.02/call) — fast + cheap for incremental edits
 //   helper         → DeepSeek Chat      (<$0.008/call)     — cheapest capable model for short JSON
-//
-// NOTE: Anthropic models require separate billing approval on OpenRouter.
-// Gemini 2.5 Pro delivers comparable itinerary quality with no extra setup.
 const MODEL_MAP: Record<TaskType, string> = {
   "main-itinerary": "google/gemini-2.5-pro-preview",
   "refinement":     "google/gemini-2.0-flash",
@@ -21,6 +18,12 @@ export function getModelForTask(
   taskType: TaskType,
   opts: { maxTokens?: number; temperature?: number } = {}
 ): ChatOpenAI {
+  if (!process.env.OPENROUTER_API_KEY) {
+    throw new Error(
+      "OPENROUTER_API_KEY is not configured. Add it to wanderlytrip-ai/.env.local and restart the server."
+    );
+  }
+
   return new ChatOpenAI({
     apiKey: process.env.OPENROUTER_API_KEY,
     model: MODEL_MAP[taskType],

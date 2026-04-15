@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { getModelForTask } from "@/lib/model-router";
 import { parseAIArray } from "@/lib/parse-ai-json";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
+  if (!rateLimit(getClientIp(req))) {
+    return NextResponse.json({ suggestions: [] }, { status: 429 });
+  }
+
   const destination = req.nextUrl.searchParams.get("destination") ?? "";
   const vibe = req.nextUrl.searchParams.get("vibe") ?? "";
   const budget = req.nextUrl.searchParams.get("budget") ?? "";

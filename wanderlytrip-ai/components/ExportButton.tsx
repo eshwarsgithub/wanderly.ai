@@ -71,7 +71,7 @@ export default function ExportButton({ itinerary }: ExportButtonProps) {
                       <Text style={styles.activityCost}>${act.estimatedCost}</Text>
                     </View>
                     <Text style={styles.activityDesc}>{act.description}</Text>
-                    {act.tips && <Text style={styles.tip}>💡 {act.tips}</Text>}
+                    {act.tips && <Text style={styles.tip}>Tip: {act.tips}</Text>}
                   </View>
                 ))}
               </View>

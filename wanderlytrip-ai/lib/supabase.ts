@@ -110,7 +110,7 @@ export interface UserProfile {
 export async function loadProfile(userId: string): Promise<UserProfile | null> {
   const db = getSupabase();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (db.from("profiles") as any)
+  const { data, error } = await (db.from("user_profiles") as any)
     .select("id, home_city, currency, dietary, travel_style, created_at, updated_at")
     .eq("id", userId)
     .single();
@@ -121,7 +121,7 @@ export async function loadProfile(userId: string): Promise<UserProfile | null> {
 export async function saveProfile(profile: Omit<UserProfile, "created_at" | "updated_at">) {
   const db = getSupabase();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (db.from("profiles") as any)
+  const { data, error } = await (db.from("user_profiles") as any)
     .upsert(profile, { onConflict: "id" })
     .select()
     .single();
@@ -212,17 +212,29 @@ export async function removeCollaborator(collaboratorId: string) {
   if (error) throw error;
 }
 
-// Generate a unique share token and make the trip public
+// Generate a unique share slug and make the trip public.
+// Retries up to 5 times on unique-constraint collision (nanoid collision is vanishingly rare but handled).
 export async function shareTrip(tripId: string): Promise<string> {
   const { nanoid } = await import("nanoid");
-  const slug = nanoid(12);
   const db = getSupabase();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (db.from("trips") as any)
-    .update({ share_slug: slug, is_public: true })
-    .eq("id", tripId);
-  if (error) throw error;
-  return slug;
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const slug = nanoid(12);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (db.from("trips") as any)
+      .update({ share_slug: slug, is_public: true })
+      .eq("id", tripId);
+
+    if (!error) return slug;
+
+    // Postgres unique violation code is 23505 — retry with a new slug
+    const isCollision =
+      (error as { code?: string }).code === "23505" ||
+      error.message?.toLowerCase().includes("unique");
+    if (!isCollision) throw error;
+  }
+
+  throw new Error("Failed to generate a unique share slug after 5 attempts");
 }
 
 // Load a trip by its public share token (no auth required — RLS allows public reads)
