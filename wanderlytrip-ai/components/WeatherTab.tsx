@@ -83,8 +83,7 @@ export default function WeatherTab({
         <Sun className="w-10 h-10 mx-auto mb-3 text-slate-200" />
         <p className="text-slate-500 text-sm font-medium mb-1">Weather forecast unavailable</p>
         <p className="text-slate-400 text-sm leading-relaxed max-w-sm mx-auto">
-          Live weather is only available for trips starting within 5 days (OpenWeatherMap free tier).
-          Add <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">OPENWEATHERMAP_API_KEY</code> to your .env.local.
+          Live weather is only available for trips starting within the next 5 days (OpenWeatherMap free tier limitation).
         </p>
       </div>
     );
