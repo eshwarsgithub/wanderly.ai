@@ -92,7 +92,7 @@ export default function Navbar() {
           {/* Desktop links */}
           <div className="hidden md:flex" style={{ alignItems: "center", gap: 32 }}>
             {NAV_LINKS.map(link => (
-              <Link key={link.href} href={link.href} style={{
+              <Link key={link.label} href={link.href} style={{
                 fontSize: 13, fontFamily: "var(--v-font-ui)", fontWeight: 400,
                 color: "inherit", opacity: pathname === link.href ? 1 : 0.65,
                 textDecoration: "none", letterSpacing: "-0.005em",
@@ -239,7 +239,7 @@ export default function Navbar() {
             }}
           >
             {NAV_LINKS.map(link => (
-              <Link key={link.href} href={link.href} onClick={() => setMobileOpen(false)} style={{
+              <Link key={link.label} href={link.href} onClick={() => setMobileOpen(false)} style={{
                 display: "flex", alignItems: "center", padding: "12px 16px",
                 borderRadius: 12, fontSize: 14, fontFamily: "var(--v-font-ui)",
                 color: "var(--v-ink)", textDecoration: "none",
