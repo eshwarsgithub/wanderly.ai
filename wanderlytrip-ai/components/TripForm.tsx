@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import VibeSelector from "@/components/VibeSelector";
 import LoadingAnimation from "@/components/LoadingAnimation";
+import NearbyGems from "@/components/NearbyGems";
 import { generateTripAction } from "@/app/actions/generate-itinerary";
 import type { DestinationStop } from "@/lib/ai-agent";
 
@@ -256,6 +257,11 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
           Powered by Claude AI · Takes ~20 seconds
         </p>
       </motion.form>
+
+      {/* Nearby Gems — auto-loads when destination is typed */}
+      <NearbyGems
+        destination={isMultiDest ? (stops[0]?.city ?? "") : form.destination}
+      />
     </>
   );
 }

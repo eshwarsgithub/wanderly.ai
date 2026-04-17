@@ -7,6 +7,7 @@ export interface DestinationGuide {
   overview: string;
   bestTime: string;
   mustSee: string[];
+  hiddenGems: string[];
   cuisine: string[];
   gettingAround: string;
   safety: string;
@@ -19,19 +20,20 @@ export async function getDestinationGuide(destination: string): Promise<Destinat
     const llm = getModelForTask("helper", { temperature: 0 });
     const res = await llm.invoke([
       new SystemMessage("You are a travel expert. Return ONLY valid JSON, no markdown fences."),
-      new HumanMessage(`Generate a concise travel guide for ${destination}.
+      new HumanMessage(`Generate a comprehensive travel guide for ${destination}.
 Return JSON with this exact shape:
 {
   "destination": "${destination}",
   "country": "<country name>",
-  "overview": "<2-3 sentence overview of the destination>",
-  "bestTime": "<best time to visit and why, 1-2 sentences>",
-  "mustSee": ["<name: description>", "<name: description>", "<name: description>", "<name: description>", "<name: description>"],
-  "cuisine": ["<dish: description>", "<dish: description>", "<dish: description>", "<dish: description>", "<dish: description>"],
-  "gettingAround": "<how to get around the city/destination, 2 sentences>",
-  "safety": "<safety tips, 1-2 sentences>",
-  "culturalTips": ["<tip>", "<tip>", "<tip>", "<tip>"],
-  "budgetEstimate": "<budget breakdown: budget/mid-range/luxury per day in USD>"
+  "overview": "<3-4 sentence vivid overview capturing the essence and atmosphere>",
+  "bestTime": "<best time to visit, weather, festivals, crowd levels — 2 sentences>",
+  "mustSee": ["<name: description — why unmissable>", "<name: description>", "<name: description>", "<name: description>", "<name: description>"],
+  "hiddenGems": ["<name: description — off the beaten path, locals-only spot>", "<name: description>", "<name: description>", "<name: description>"],
+  "cuisine": ["<dish or food experience: description and where to try it>", "<dish: description>", "<dish: description>", "<dish: description>", "<dish: description>"],
+  "gettingAround": "<practical transport tips: metro, taxi, walking, apps — 2-3 sentences>",
+  "safety": "<honest safety assessment, areas to avoid, common scams, emergency tips — 2 sentences>",
+  "culturalTips": ["<specific do or don't with brief explanation>", "<tip>", "<tip>", "<tip>", "<tip>"],
+  "budgetEstimate": "<daily budget in USD: budget $X-Y | mid-range $Y-Z | luxury $Z+"
 }`),
     ]);
     const raw = typeof res.content === "string" ? res.content : JSON.stringify(res.content);
