@@ -1,16 +1,14 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { MapPin, Calendar, DollarSign, Users, Sparkles, ArrowRight, Plus, Trash2, Globe } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Plus, Trash2, Globe, Sparkles } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-import VibeSelector from "@/components/VibeSelector";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import NearbyGems from "@/components/NearbyGems";
-import { generateTripAction } from "@/app/actions/generate-itinerary";
+import { generateTripAction, parseNLAction } from "@/app/actions/generate-itinerary";
+import { VIBES } from "@/components/VibeSelector";
 import type { DestinationStop } from "@/lib/ai-agent";
 
 export default function TripForm({ defaultDestination = "" }: { defaultDestination?: string }) {
@@ -19,6 +17,10 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
   const [loadingStep, setLoadingStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isMultiDest, setIsMultiDest] = useState(false);
+  const [brief, setBrief] = useState("");
+  const [parsing, setParsing] = useState(false);
+  const briefTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [stops, setStops] = useState<DestinationStop[]>([
     { city: "", days: 3 },
     { city: "", days: 3 },
@@ -34,9 +36,7 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
   });
 
   useEffect(() => {
-    if (defaultDestination) {
-      setForm((prev) => ({ ...prev, destination: defaultDestination }));
-    }
+    if (defaultDestination) setForm((p) => ({ ...p, destination: defaultDestination }));
   }, [defaultDestination]);
 
   function addStop() {
@@ -57,6 +57,31 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
     return () => clearInterval(interval);
   }, [isPending]);
 
+  // Auto-parse natural language brief
+  function handleBriefChange(val: string) {
+    setBrief(val);
+    if (briefTimeout.current) clearTimeout(briefTimeout.current);
+    if (val.trim().length < 12) return;
+    briefTimeout.current = setTimeout(async () => {
+      setParsing(true);
+      try {
+        const res = await parseNLAction(val);
+        if (res.success && res.partial) {
+          setForm((prev) => ({
+            ...prev,
+            destination: res.partial.destination ?? prev.destination,
+            startDate: res.partial.startDate ?? prev.startDate,
+            endDate: res.partial.endDate ?? prev.endDate,
+            budget: res.partial.budget ?? prev.budget,
+            travelers: res.partial.travelers ?? prev.travelers,
+            vibe: res.partial.vibe ?? prev.vibe,
+          }));
+        }
+      } catch { /* ignore */ }
+      setParsing(false);
+    }, 900);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -76,192 +101,375 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
         vibe: form.vibe,
       });
 
-      if (!result.success) {
-        setError(result.error);
-        return;
-      }
+      if (!result.success) { setError(result.error); return; }
       sessionStorage.setItem(`trip-${result.itinerary.id}`, JSON.stringify(result.itinerary));
       router.push(`/trip/${result.itinerary.id}`);
     });
   }
 
-  const inputClass = "h-11 rounded-xl border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.04)]";
+  // Derived preview values
+  const previewDest = isMultiDest
+    ? stops.filter((s) => s.city).map((s) => s.city).join(" · ") || "—"
+    : form.destination || "—";
+  const selectedVibe = VIBES.find((v) => v.id === form.vibe);
+  const nightCount = form.startDate && form.endDate
+    ? Math.max(0, Math.round((new Date(form.endDate).getTime() - new Date(form.startDate).getTime()) / 86400000))
+    : null;
+
+  // Section label style
+  const sectionLabel: React.CSSProperties = {
+    fontFamily: "var(--v-font-mono)",
+    fontSize: 10,
+    letterSpacing: "0.12em",
+    textTransform: "uppercase",
+    color: "var(--v-slate-2)",
+    marginBottom: 14,
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+  };
+
+  // Underline input style
+  const lineInput: React.CSSProperties = {
+    background: "transparent",
+    border: "none",
+    borderBottom: "1px solid rgba(124,92,255,0.25)",
+    borderRadius: 0,
+    outline: "none",
+    width: "100%",
+    fontFamily: "var(--v-font-ui)",
+    fontSize: 15,
+    color: "var(--v-ink)",
+    padding: "8px 0",
+    transition: "border-color 0.2s",
+  };
 
   return (
     <>
       {isPending && <LoadingAnimation step={loadingStep} />}
 
-      <motion.form
-        onSubmit={handleSubmit}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 space-y-7 max-w-2xl mx-auto"
-      >
+      <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr", gap: 0 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 300px", gap: 28, alignItems: "start" }}
+          className="max-md:!grid-cols-1">
 
-        {/* Destination */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label className="text-[#0f172a] font-semibold text-sm flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-[#00a896]" />
-              Where to?
-            </Label>
-            <button
-              type="button"
-              onClick={() => setIsMultiDest(!isMultiDest)}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all"
-              style={
-                isMultiDest
-                  ? { background: "#f8fafc", borderColor: "#cbd5e1", color: "#0f172a" }
-                  : { background: "transparent", borderColor: "#e2e8f0", color: "#94a3b8" }
-              }
-            >
-              <Globe className="w-3 h-3" />
-              Multi-city
-            </button>
-          </div>
+          {/* ── LEFT: Sections ── */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-          {!isMultiDest ? (
-            <Input required placeholder="Tokyo, Bali, Paris, New York…" value={form.destination}
-              onChange={(e) => setForm({ ...form, destination: e.target.value })}
-              className={inputClass} />
-          ) : (
-            <div className="space-y-2">
-              {stops.map((stop, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-[#0f172a] flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">{i + 1}</div>
-                  <Input required={isMultiDest} placeholder={`City ${i + 1}`} value={stop.city}
-                    onChange={(e) => updateStop(i, "city", e.target.value)}
-                    className={`flex-1 ${inputClass}`} />
-                  <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-3 h-11">
-                    <Input type="number" min={1} max={14} value={stop.days}
-                      onChange={(e) => updateStop(i, "days", Number(e.target.value))}
-                      className="w-10 bg-transparent border-0 text-[#0f172a] text-center text-sm p-0 h-auto focus-visible:ring-0" />
-                    <span className="text-slate-400 text-xs whitespace-nowrap">days</span>
-                  </div>
-                  {stops.length > 2 && (
-                    <button type="button" onClick={() => removeStop(i)}
-                      className="w-8 h-8 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center text-red-400 hover:bg-red-100 flex-shrink-0 transition-colors">
-                      <Trash2 className="w-3.5 h-3.5" />
+            {/* i. The brief */}
+            <div className="v-glass" style={{ padding: "24px 28px", borderRadius: 20 }}>
+              <div style={sectionLabel}>
+                <span style={{ fontFamily: "var(--v-font-display)", fontStyle: "italic", fontSize: 14, color: "var(--v-violet-2)" }}>i.</span>
+                The brief
+                {parsing && <span style={{ fontSize: 9, opacity: 0.5 }}>parsing…</span>}
+              </div>
+              <textarea
+                value={brief}
+                onChange={(e) => handleBriefChange(e.target.value)}
+                placeholder={"Ten days in Kyoto, late April. Two adults, obsessed with temples and kaiseki dining…"}
+                rows={3}
+                style={{
+                  width: "100%", background: "transparent", border: "none", outline: "none", resize: "none",
+                  fontFamily: "var(--v-font-display)", fontSize: 18, fontWeight: 300, lineHeight: 1.6,
+                  color: "var(--v-ink)", letterSpacing: "-0.01em",
+                }}
+              />
+              <p style={{ fontSize: 11, fontFamily: "var(--v-font-mono)", color: "var(--v-slate-2)", opacity: 0.6, marginTop: 8 }}>
+                Optional — AI will auto-fill fields below
+              </p>
+            </div>
+
+            {/* ii. Where & when */}
+            <div className="v-glass" style={{ padding: "24px 28px", borderRadius: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                <div style={sectionLabel}>
+                  <span style={{ fontFamily: "var(--v-font-display)", fontStyle: "italic", fontSize: 14, color: "var(--v-violet-2)" }}>ii.</span>
+                  Where &amp; when
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMultiDest(!isMultiDest)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    padding: "4px 12px", borderRadius: 999, fontSize: 11,
+                    fontFamily: "var(--v-font-mono)", letterSpacing: "0.06em",
+                    border: "1px solid rgba(124,92,255,0.25)",
+                    background: isMultiDest ? "rgba(124,92,255,0.1)" : "transparent",
+                    color: isMultiDest ? "var(--v-violet)" : "var(--v-slate-2)",
+                    cursor: "pointer", transition: "all 0.2s",
+                  }}
+                >
+                  <Globe size={11} /> Multi-city
+                </button>
+              </div>
+
+              {!isMultiDest ? (
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ fontSize: 10, fontFamily: "var(--v-font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--v-slate-2)", opacity: 0.7 }}>Destination</label>
+                  <input
+                    required
+                    placeholder="Tokyo · Bali · Paris · New York"
+                    value={form.destination}
+                    onChange={(e) => setForm({ ...form, destination: e.target.value })}
+                    style={lineInput}
+                    onFocus={(e) => (e.currentTarget.style.borderBottomColor = "var(--v-violet)")}
+                    onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(124,92,255,0.25)")}
+                  />
+                </div>
+              ) : (
+                <div style={{ marginBottom: 20 }}>
+                  {stops.map((stop, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                      <div style={{
+                        width: 22, height: 22, borderRadius: 999, flexShrink: 0,
+                        background: "linear-gradient(135deg, var(--v-violet), var(--v-sky-deep))",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        color: "white", fontSize: 10, fontWeight: 700,
+                      }}>{i + 1}</div>
+                      <input
+                        required={isMultiDest}
+                        placeholder={`City ${i + 1}`}
+                        value={stop.city}
+                        onChange={(e) => updateStop(i, "city", e.target.value)}
+                        style={{ ...lineInput, flex: 1 }}
+                        onFocus={(e) => (e.currentTarget.style.borderBottomColor = "var(--v-violet)")}
+                        onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(124,92,255,0.25)")}
+                      />
+                      <input
+                        type="number" min={1} max={14} value={stop.days}
+                        onChange={(e) => updateStop(i, "days", Number(e.target.value))}
+                        style={{ ...lineInput, width: 36, textAlign: "center", fontSize: 13 }}
+                      />
+                      <span style={{ fontSize: 11, color: "var(--v-slate-2)", whiteSpace: "nowrap" }}>days</span>
+                      {stops.length > 2 && (
+                        <button type="button" onClick={() => removeStop(i)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--v-pink)", opacity: 0.7 }}>
+                          <Trash2 size={13} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {stops.length < 4 && (
+                    <button type="button" onClick={addStop} style={{
+                      background: "none", border: "none", cursor: "pointer",
+                      display: "flex", alignItems: "center", gap: 6,
+                      fontFamily: "var(--v-font-mono)", fontSize: 11,
+                      color: "var(--v-violet)", letterSpacing: "0.06em",
+                    }}>
+                      <Plus size={11} /> Add city
                     </button>
                   )}
                 </div>
-              ))}
-              {stops.length < 4 && (
-                <button type="button" onClick={addStop}
-                  className="flex items-center gap-1.5 text-[#00a896] hover:text-[#007a6a] text-sm transition-colors pt-1 font-medium">
-                  <Plus className="w-3.5 h-3.5" /> Add city (max 4)
-                </button>
               )}
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                <div>
+                  <label style={{ fontSize: 10, fontFamily: "var(--v-font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--v-slate-2)", opacity: 0.7 }}>Start date</label>
+                  <input
+                    required type="date"
+                    value={form.startDate}
+                    min={new Date().toISOString().split("T")[0]}
+                    onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+                    style={{ ...lineInput, colorScheme: "light" } as React.CSSProperties}
+                    onFocus={(e) => (e.currentTarget.style.borderBottomColor = "var(--v-violet)")}
+                    onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(124,92,255,0.25)")}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: 10, fontFamily: "var(--v-font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--v-slate-2)", opacity: 0.7 }}>End date</label>
+                  <input
+                    required type="date"
+                    value={form.endDate}
+                    min={form.startDate || new Date().toISOString().split("T")[0]}
+                    onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+                    style={{ ...lineInput, colorScheme: "light" } as React.CSSProperties}
+                    onFocus={(e) => (e.currentTarget.style.borderBottomColor = "var(--v-violet)")}
+                    onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(124,92,255,0.25)")}
+                  />
+                </div>
+              </div>
             </div>
-          )}
-        </div>
 
-        {/* Dates */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label className="text-[#0f172a] font-semibold text-sm flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[#00a896]" />
-              Start date
-            </Label>
-            <Input required type="date" value={form.startDate}
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-              className={`${inputClass} [color-scheme:light]`} />
+            {/* iii. The party · The envelope */}
+            <div className="v-glass" style={{ padding: "24px 28px", borderRadius: 20 }}>
+              <div style={sectionLabel}>
+                <span style={{ fontFamily: "var(--v-font-display)", fontStyle: "italic", fontSize: 14, color: "var(--v-violet-2)" }}>iii.</span>
+                The party · The envelope
+              </div>
+
+              {/* Travelers */}
+              <div style={{ marginBottom: 24 }}>
+                <label style={{ fontSize: 10, fontFamily: "var(--v-font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--v-slate-2)", opacity: 0.7, display: "block", marginBottom: 12 }}>Travelers</label>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {[1, 2, 3, 4, 5, 6].map((n) => (
+                    <button
+                      key={n} type="button"
+                      onClick={() => setForm({ ...form, travelers: n })}
+                      style={{
+                        width: 42, height: 42, borderRadius: 999,
+                        border: "1px solid",
+                        borderColor: form.travelers === n ? "var(--v-violet)" : "rgba(124,92,255,0.2)",
+                        background: form.travelers === n
+                          ? "linear-gradient(135deg, var(--v-violet), var(--v-sky-deep))"
+                          : "transparent",
+                        color: form.travelers === n ? "white" : "var(--v-slate-2)",
+                        fontSize: 13, fontFamily: "var(--v-font-ui)", fontWeight: 500,
+                        cursor: "pointer", transition: "all 0.2s",
+                      }}
+                    >{n}</button>
+                  ))}
+                  <span style={{ fontSize: 12, color: "var(--v-slate-2)", alignSelf: "center", fontFamily: "var(--v-font-ui)" }}>
+                    person{form.travelers > 1 ? "s" : ""}
+                  </span>
+                </div>
+              </div>
+
+              {/* Budget */}
+              <div>
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
+                  <label style={{ fontSize: 10, fontFamily: "var(--v-font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--v-slate-2)", opacity: 0.7 }}>Total budget</label>
+                  <span style={{ fontFamily: "var(--v-font-display)", fontSize: 22, fontWeight: 300, color: "var(--v-ink)", letterSpacing: "-0.02em" }}>
+                    ${form.budget.toLocaleString()}
+                  </span>
+                </div>
+                <Slider
+                  min={500} max={20000} step={100}
+                  value={[form.budget]}
+                  onValueChange={(val) => setForm({ ...form, budget: Array.isArray(val) ? val[0] : val })}
+                  className="[&_[role=slider]]:bg-[--v-violet] [&_[role=slider]]:border-[--v-violet] [&_.bg-primary]:bg-[--v-violet]"
+                />
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontFamily: "var(--v-font-mono)", fontSize: 9, letterSpacing: "0.08em", color: "var(--v-slate-2)", opacity: 0.5, textTransform: "uppercase" }}>
+                  <span>Budget</span><span>Mid-range</span><span>Premium</span>
+                </div>
+              </div>
+            </div>
+
+            {/* iv. The temperament */}
+            <div className="v-glass" style={{ padding: "24px 28px", borderRadius: 20 }}>
+              <div style={sectionLabel}>
+                <span style={{ fontFamily: "var(--v-font-display)", fontStyle: "italic", fontSize: 14, color: "var(--v-violet-2)" }}>iv.</span>
+                The temperament
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 8 }}>
+                {VIBES.map((vibe) => {
+                  const isSelected = form.vibe === vibe.id;
+                  const Icon = vibe.icon;
+                  return (
+                    <button
+                      key={vibe.id} type="button"
+                      onClick={() => setForm({ ...form, vibe: vibe.id })}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 8,
+                        padding: "10px 14px", borderRadius: 12,
+                        border: "1px solid",
+                        borderColor: isSelected ? `${vibe.color}60` : "rgba(124,92,255,0.15)",
+                        background: isSelected ? `${vibe.color}12` : "rgba(255,255,255,0.4)",
+                        color: isSelected ? vibe.color : "var(--v-slate-2)",
+                        fontFamily: "var(--v-font-ui)", fontSize: 12, fontWeight: 500,
+                        cursor: "pointer", transition: "all 0.2s",
+                      }}
+                    >
+                      <Icon size={13} style={{ color: isSelected ? vibe.color : "var(--v-slate-2)", flexShrink: 0 }} />
+                      {vibe.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Error */}
+            <AnimatePresence>
+              {error && (
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                  style={{ padding: "14px 18px", borderRadius: 14, background: "rgba(232,67,147,0.06)", border: "1px solid rgba(232,67,147,0.2)", color: "#e84393", fontSize: 13, fontFamily: "var(--v-font-ui)" }}>
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Submit */}
+            <motion.button
+              type="submit" disabled={isPending}
+              whileHover={isPending ? {} : { scale: 1.01 }}
+              whileTap={isPending ? {} : { scale: 0.99 }}
+              className="v-btn v-btn-ink"
+              style={{ width: "100%", padding: "16px 24px", fontSize: 14, gap: 10, justifyContent: "center" }}
+            >
+              <Sparkles size={15} />
+              {isPending ? "Composing your journey…" : "Generate itinerary"}
+            </motion.button>
+
+            <p style={{ textAlign: "center", fontSize: 11, fontFamily: "var(--v-font-mono)", color: "var(--v-slate-2)", opacity: 0.5, letterSpacing: "0.06em" }}>
+              Powered by Claude AI · ~20 seconds
+            </p>
           </div>
-          <div className="space-y-2">
-            <Label className="text-[#0f172a] font-semibold text-sm flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[#00a896]" />
-              End date
-            </Label>
-            <Input required type="date" value={form.endDate}
-              min={form.startDate || new Date().toISOString().split("T")[0]}
-              onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-              className={`${inputClass} [color-scheme:light]`} />
-          </div>
+
+          {/* ── RIGHT: Sticky preview ── */}
+          <aside className="max-md:hidden" style={{ position: "sticky", top: 100 }}>
+            <div style={{
+              background: "rgba(26,22,48,0.92)",
+              backdropFilter: "blur(28px)",
+              WebkitBackdropFilter: "blur(28px)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 24, overflow: "hidden",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.25)",
+            }}>
+              {/* Destination plate */}
+              <div style={{
+                aspectRatio: "3/2", position: "relative",
+                background: "linear-gradient(135deg, rgba(124,92,255,0.5), rgba(110,195,255,0.3))",
+                display: "flex", alignItems: "flex-end",
+                padding: "20px 22px",
+              }}>
+                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 30% 40%, rgba(124,92,255,0.4) 0%, transparent 60%)" }} />
+                <div style={{ position: "relative" }}>
+                  <div style={{ fontFamily: "var(--v-font-mono)", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: 4 }}>Destination</div>
+                  <div style={{ fontFamily: "var(--v-font-display)", fontSize: previewDest === "—" ? 28 : Math.min(28, 200 / Math.max(previewDest.length, 1)), fontWeight: 400, color: "white", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+                    {previewDest}
+                  </div>
+                </div>
+              </div>
+
+              {/* Meta chips */}
+              <div style={{ padding: "18px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {nightCount !== null && (
+                    <span className="v-chip">
+                      {nightCount} night{nightCount !== 1 ? "s" : ""}
+                    </span>
+                  )}
+                  <span className="v-chip">
+                    {form.travelers} {form.travelers > 1 ? "travelers" : "traveler"}
+                  </span>
+                  {selectedVibe && (
+                    <span className="v-chip" style={{ color: selectedVibe.color, borderColor: `${selectedVibe.color}40`, background: `${selectedVibe.color}12` }}>
+                      {selectedVibe.label}
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+                  <span style={{ fontFamily: "var(--v-font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Budget</span>
+                  <span style={{ fontFamily: "var(--v-font-display)", fontSize: 24, fontWeight: 300, color: "white", letterSpacing: "-0.02em" }}>
+                    ${form.budget.toLocaleString()}
+                  </span>
+                </div>
+
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 14 }}>
+                  <div style={{ fontFamily: "var(--v-font-mono)", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: 6 }}>
+                    Ready to plan
+                  </div>
+                  <div style={{ fontFamily: "var(--v-font-display)", fontStyle: "italic", fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.5 }}>
+                    {form.destination
+                      ? `Your journey to ${form.destination.split("·")[0].trim()} awaits.`
+                      : "Fill in the details to begin your journey."}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
         </div>
+      </form>
 
-        {/* Budget */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label className="text-[#0f172a] font-semibold text-sm flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-[#00a896]" />
-              Total budget
-            </Label>
-            <span className="text-[#0f172a] font-bold text-base">${form.budget.toLocaleString()}</span>
-          </div>
-          <Slider min={500} max={20000} step={100} value={[form.budget]}
-            onValueChange={(val) => setForm({ ...form, budget: Array.isArray(val) ? val[0] : val })}
-            className="[&_[role=slider]]:bg-[#0f172a] [&_[role=slider]]:border-[#0f172a] [&_.bg-primary]:bg-[#0f172a]" />
-          <div className="flex justify-between text-xs text-slate-400">
-            <span>$500</span><span>Budget</span><span>$10K</span><span>Premium</span><span>$20K</span>
-          </div>
-        </div>
-
-        {/* Travelers */}
-        <div className="space-y-3">
-          <Label className="text-[#0f172a] font-semibold text-sm flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#00a896]" />
-            Travelers
-          </Label>
-          <div className="flex items-center gap-2 flex-wrap">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <button key={n} type="button"
-                onClick={() => setForm({ ...form, travelers: n })}
-                className="w-11 h-11 rounded-xl text-sm font-semibold transition-all border"
-                style={
-                  form.travelers === n
-                    ? { background: "#0f172a", color: "#ffffff", borderColor: "#0f172a" }
-                    : { background: "#ffffff", color: "#475569", borderColor: "#e2e8f0" }
-                }
-              >
-                {n}
-              </button>
-            ))}
-            <span className="text-slate-400 text-sm ml-1">person{form.travelers > 1 ? "s" : ""}</span>
-          </div>
-        </div>
-
-        {/* Vibe */}
-        <div className="space-y-3">
-          <Label className="text-[#0f172a] font-semibold text-sm flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#00a896]" />
-            Your travel vibe
-          </Label>
-          <VibeSelector selected={form.vibe} onSelect={(vibe) => setForm({ ...form, vibe })} />
-        </div>
-
-        {/* Error */}
-        <AnimatePresence>
-          {error && (
-            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">
-              {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Submit */}
-        <motion.button type="submit" disabled={isPending}
-          whileHover={isPending ? {} : { scale: 1.01 }}
-          whileTap={isPending ? {} : { scale: 0.99 }}
-          className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl font-bold text-base disabled:opacity-50 transition-all shadow-sm"
-          style={{ background: "#0f172a", color: "#ffffff" }}
-        >
-          <Sparkles className="w-4 h-4" />
-          {isPending ? "Generating your itinerary…" : "Generate My Itinerary"}
-          {!isPending && <ArrowRight className="w-4 h-4" />}
-        </motion.button>
-
-        <p className="text-center text-slate-400 text-xs">
-          Powered by Claude AI · Takes ~20 seconds
-        </p>
-      </motion.form>
-
-      {/* Nearby Gems — auto-loads when destination is typed */}
-      <NearbyGems
-        destination={isMultiDest ? (stops[0]?.city ?? "") : form.destination}
-      />
+      <NearbyGems destination={isMultiDest ? (stops[0]?.city ?? "") : form.destination} />
     </>
   );
 }

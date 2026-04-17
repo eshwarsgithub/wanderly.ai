@@ -320,14 +320,14 @@ export default function TripDashboard() {
 
   if (!itinerary) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--v-paper)" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-            className="w-10 h-10 rounded-full border-2 border-slate-200 border-t-[#0f172a]"
+            style={{ width: 40, height: 40, borderRadius: 999, border: "2px solid rgba(124,92,255,0.2)", borderTopColor: "var(--v-violet)" }}
           />
-          <p className="text-slate-400 text-sm">Loading your trip...</p>
+          <p style={{ fontFamily: "var(--v-font-mono)", fontSize: 11, letterSpacing: "0.1em", color: "var(--v-slate-2)", textTransform: "uppercase" }}>Loading your journey…</p>
         </div>
       </div>
     );
@@ -374,7 +374,7 @@ export default function TripDashboard() {
       </AnimatePresence>
 
       {/* Hero banner */}
-      <div className="bg-[#0f172a] pt-16">
+      <div style={{ background: "linear-gradient(160deg, #1A1630 0%, #12102a 100%)", paddingTop: 64 }}>
         <div className="max-w-6xl mx-auto px-4 py-14">
           <Link href="/generate" className="inline-flex items-center gap-2 text-white/50 hover:text-white mb-8 transition-colors text-sm">
             <ArrowLeft className="w-4 h-4" />
@@ -408,7 +408,7 @@ export default function TripDashboard() {
               </motion.button>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl font-bold text-white tracking-tight mb-4">
+            <h1 style={{ fontFamily: "var(--v-font-display)", fontSize: "clamp(36px,6vw,72px)", fontWeight: 400, letterSpacing: "-0.03em", color: "white", marginBottom: 16, lineHeight: 1 }}>
               {itinerary.destination}
             </h1>
             <p className="text-white/60 max-w-2xl text-lg leading-relaxed mb-8">
@@ -433,7 +433,7 @@ export default function TripDashboard() {
       </div>
 
       {/* Highlights strip */}
-      <div className="bg-[#0f172a] border-b border-white/5">
+      <div style={{ background: "linear-gradient(160deg, #1A1630 0%, #12102a 100%)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex gap-3 overflow-x-auto pb-1">
             {itinerary.highlights.map((h, i) => (
@@ -453,18 +453,23 @@ export default function TripDashboard() {
       </div>
 
       {/* Main content area */}
-      <div className="max-w-6xl mx-auto px-4 pt-8 pb-32 bg-[#f5f7fa]">
+      <div className="max-w-6xl mx-auto px-4 pt-8 pb-32" style={{ background: "var(--v-paper)" }}>
         {/* Tabs — scrollable on mobile */}
         <div className="overflow-x-auto mb-8">
-          <div className="flex gap-1 bg-white border border-slate-200 rounded-2xl p-1 w-fit shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+          <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.6)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(124,92,255,0.12)", borderRadius: 20, padding: 4, width: "fit-content", boxShadow: "0 2px 12px rgba(124,92,255,0.08)" }}>
             {TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className="flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
                 style={{
-                  background: activeTab === tab.id ? "#0f172a" : "transparent",
-                  color: activeTab === tab.id ? "#ffffff" : "#64748b",
+                  flexShrink: 0, padding: "8px 16px", borderRadius: 14,
+                  fontSize: 12, fontFamily: "var(--v-font-ui)", fontWeight: 500,
+                  cursor: "pointer", border: "none", transition: "all 0.2s",
+                  background: activeTab === tab.id
+                    ? "linear-gradient(135deg, var(--v-violet), var(--v-sky-deep))"
+                    : "transparent",
+                  color: activeTab === tab.id ? "#fff" : "var(--v-slate-2)",
+                  boxShadow: activeTab === tab.id ? "0 4px 12px rgba(124,92,255,0.35)" : "none",
                 }}
               >
                 {tab.label}
