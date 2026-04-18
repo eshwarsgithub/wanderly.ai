@@ -229,7 +229,27 @@ export default function TripDashboard() {
   function handleItineraryUpdate(updated: GeneratedItinerary) {
     setItinerary(updated);
     sessionStorage.setItem(`trip-${id}`, JSON.stringify(updated));
-    setSaveState("idle");
+    setSaveState("saving");
+    persistTrip(updated)
+      .then(() => {
+        setSaveState("saved");
+        setTimeout(() => setSaveState("idle"), 3000);
+      })
+      .catch(() => setSaveState("idle"));
+  }
+
+  function handleSwapActivity(dayNumber: number, activityId: string, replacement: Activity) {
+    if (!itinerary) return;
+    const updated: GeneratedItinerary = {
+      ...itinerary,
+      days: itinerary.days.map((d) =>
+        d.day === dayNumber
+          ? { ...d, activities: d.activities.map((a) => a.id === activityId ? replacement : a) }
+          : d
+      ),
+    };
+    setItinerary(updated);
+    sessionStorage.setItem(`trip-${id}`, JSON.stringify(updated));
     persistTrip(updated).catch(() => {});
   }
 
@@ -384,7 +404,7 @@ export default function TripDashboard() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
               <div className="flex items-center gap-3">
-                <Globe className="w-5 h-5 text-[#14b8a6]" />
+                <Globe className="w-5 h-5 text-white/50" />
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white/80 capitalize border border-white/10">
                   {itinerary.vibe}
                 </span>
@@ -423,7 +443,7 @@ export default function TripDashboard() {
                 { icon: Star, label: itinerary.bestTimeToVisit },
               ].map(({ icon: Icon, label }) => (
                 <div key={label} className="flex items-center gap-2 text-white/60 text-sm">
-                  <Icon className="w-4 h-4 text-[#14b8a6]" />
+                  <Icon className="w-4 h-4 text-white/40" />
                   <span>{label}</span>
                 </div>
               ))}
@@ -485,7 +505,9 @@ export default function TripDashboard() {
                 openDay={openDay}
                 onDayChange={setOpenDay}
                 onActivitiesReorder={handleActivitiesReorder}
+                onSwapActivity={handleSwapActivity}
                 weatherByDate={weatherByDate}
+                itinerary={itinerary}
               />
             )}
 

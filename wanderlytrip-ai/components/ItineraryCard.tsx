@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, MapPin, DollarSign, Lightbulb, Timer, ExternalLink, GripVertical } from "lucide-react";
+import { Clock, MapPin, DollarSign, Lightbulb, Timer, ExternalLink, GripVertical, RefreshCw } from "lucide-react";
 import type { Activity } from "@/lib/ai-agent";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; border: string; label: string }> = {
@@ -20,6 +20,8 @@ interface ItineraryCardProps {
   index: number;
   isLast: boolean;
   isDraggable?: boolean;
+  onSwap?: () => void;
+  isSwapping?: boolean;
 }
 
 function BookingLinks({ activity }: { activity: Activity }) {
@@ -66,7 +68,7 @@ function BookingLinks({ activity }: { activity: Activity }) {
   );
 }
 
-export default function ItineraryCard({ activity, index, isLast, isDraggable = false }: ItineraryCardProps) {
+export default function ItineraryCard({ activity, index, isLast, isDraggable = false, onSwap, isSwapping = false }: ItineraryCardProps) {
   const cat = CATEGORY_STYLES[activity.category] ?? CATEGORY_STYLES.activity;
 
   return (
@@ -110,9 +112,22 @@ export default function ItineraryCard({ activity, index, isLast, isDraggable = f
                     <Clock className="w-3 h-3" /> {activity.time}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 text-sm font-semibold text-[#0f172a] flex-shrink-0">
-                  <DollarSign className="w-3.5 h-3.5 text-slate-400" />
-                  {activity.estimatedCost}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {onSwap && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onSwap(); }}
+                      disabled={isSwapping}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-[10px] text-slate-400 hover:text-slate-700 disabled:cursor-wait px-1.5 py-0.5 rounded-full hover:bg-slate-100"
+                      title="Swap with AI alternative"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${isSwapping ? "animate-spin" : ""}`} />
+                      {isSwapping ? "Finding…" : "Swap"}
+                    </button>
+                  )}
+                  <div className="flex items-center gap-1 text-sm font-semibold text-[#0f172a]">
+                    <DollarSign className="w-3.5 h-3.5 text-slate-400" />
+                    {activity.estimatedCost}
+                  </div>
                 </div>
               </div>
               <h4 className="font-semibold text-[#0f172a] text-sm leading-snug">{activity.name}</h4>
