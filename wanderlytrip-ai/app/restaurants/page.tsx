@@ -40,10 +40,10 @@ function RestaurantSkeleton() {
 }
 
 const PRICE_BG: Record<string, { bg: string; text: string; border: string }> = {
-  "$":    { bg: "#f0fdf4", text: "#15803d", border: "#bbf7d0" },
+  "$":    { bg: "#f8fafc", text: "#475569", border: "#e2e8f0" },
   "$$":   { bg: "#fefce8", text: "#92400e", border: "#fde68a" },
   "$$$":  { bg: "#fdf4ff", text: "#86198f", border: "#f5d0fe" },
-  "$$$$": { bg: "#f0fdfb", text: "#007a6a", border: "#99f6e4" },
+  "$$$$": { bg: "#1a1630", text: "#ffffff", border: "#1a1630" },
 };
 
 export default function RestaurantsPage() {
@@ -84,7 +84,7 @@ export default function RestaurantsPage() {
       <Navbar />
       <div className="pt-28 pb-20 px-4 max-w-5xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f0fdfb] border border-[#99f6e4] text-[#007a6a] text-xs font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-medium mb-4">
             <UtensilsCrossed className="w-3 h-3" />
             AI-Curated Dining
           </div>
@@ -165,8 +165,8 @@ export default function RestaurantsPage() {
 
                   <p className="text-slate-500 text-xs mb-3 italic leading-relaxed">{r.vibe}</p>
 
-                  <div className="p-3 rounded-xl bg-[#f0fdfb] border border-[#99f6e4] mb-3">
-                    <p className="text-[#007a6a] text-xs font-medium">Must try: {r.mustTry}</p>
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 mb-3">
+                    <p className="text-slate-700 text-xs font-medium">Must try: {r.mustTry}</p>
                   </div>
 
                   <p className="text-slate-400 text-xs mb-4 flex-1 leading-relaxed">{r.tip}</p>

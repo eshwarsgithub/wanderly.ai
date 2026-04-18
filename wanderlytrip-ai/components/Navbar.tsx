@@ -9,10 +9,11 @@ import { getSupabase } from "@/lib/supabase";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const NAV_LINKS = [
-  { label: "Destinations", href: "/explore" },
+  { label: "Explore",      href: "/explore" },
   { label: "Flights",      href: "/flights" },
   { label: "Hotels",       href: "/hotels" },
-  { label: "Journal",      href: "/explore" },
+  { label: "Restaurants",  href: "/restaurants" },
+  { label: "Saved",        href: "/saved" },
 ];
 
 export default function Navbar() {

@@ -39,7 +39,7 @@ export default function SavedPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <Bookmark className="w-5 h-5 text-[#00a896]" />
+              <Bookmark className="w-5 h-5 text-slate-500" />
               <h1 className="text-3xl font-bold text-[#0f172a] tracking-tight">Saved Trips</h1>
             </div>
             <p className="text-slate-500 text-sm">Your curated travel collection</p>
@@ -106,12 +106,12 @@ export default function SavedPage() {
                     <div>
                       <h3 className="text-[#0f172a] font-bold text-lg leading-tight">{trip.destination}</h3>
                       <span className="inline-flex items-center mt-1.5 px-2 py-0.5 rounded-full text-xs font-medium capitalize"
-                        style={{ background: "#f0fdfb", color: "#007a6a", border: "1px solid #99f6e4" }}>
+                        style={{ background: "rgba(124,92,255,0.08)", color: "#7C5CFF", border: "1px solid rgba(124,92,255,0.2)" }}>
                         {trip.vibe}
                       </span>
                     </div>
-                    <div className="w-10 h-10 rounded-xl bg-[#f0fdfb] flex items-center justify-center flex-shrink-0">
-                      <Globe className="w-5 h-5 text-[#00a896]" />
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
+                      <Globe className="w-5 h-5 text-slate-400" />
                     </div>
                   </div>
 

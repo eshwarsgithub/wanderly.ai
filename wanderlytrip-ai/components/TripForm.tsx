@@ -193,8 +193,8 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
                     padding: "4px 12px", borderRadius: 999, fontSize: 11,
                     fontFamily: "var(--v-font-mono)", letterSpacing: "0.06em",
                     border: "1px solid rgba(124,92,255,0.25)",
-                    background: isMultiDest ? "rgba(124,92,255,0.1)" : "transparent",
-                    color: isMultiDest ? "var(--v-violet)" : "var(--v-slate-2)",
+                    background: isMultiDest ? "rgba(0,0,0,0.08)" : "transparent",
+                    color: isMultiDest ? "#0f0f0f" : "var(--v-slate-2)",
                     cursor: "pointer", transition: "all 0.2s",
                   }}
                 >
@@ -306,11 +306,10 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
                       style={{
                         width: 42, height: 42, borderRadius: 999,
                         border: "1px solid",
-                        borderColor: form.travelers === n ? "var(--v-violet)" : "rgba(124,92,255,0.2)",
-                        background: form.travelers === n
-                          ? "linear-gradient(135deg, var(--v-violet), var(--v-sky-deep))"
-                          : "transparent",
+                        borderColor: form.travelers === n ? "#0f0f0f" : "rgba(0,0,0,0.12)",
+                        background: form.travelers === n ? "#0f0f0f" : "transparent",
                         color: form.travelers === n ? "white" : "var(--v-slate-2)",
+                        boxShadow: form.travelers === n ? "0 4px 14px rgba(0,0,0,0.18)" : "none",
                         fontSize: 13, fontFamily: "var(--v-font-ui)", fontWeight: 500,
                         cursor: "pointer", transition: "all 0.2s",
                       }}

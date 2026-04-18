@@ -77,9 +77,10 @@ export default function ExplorePage() {
   }
 
   const chipActive: React.CSSProperties = {
-    background: "rgba(124,92,255,0.12)",
-    color: "var(--v-violet)",
-    border: "1px solid rgba(124,92,255,0.35)",
+    background: "#0f0f0f",
+    color: "#ffffff",
+    border: "1px solid #0f0f0f",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
   };
   const chipIdle: React.CSSProperties = {
     background: "rgba(255,255,255,0.5)",

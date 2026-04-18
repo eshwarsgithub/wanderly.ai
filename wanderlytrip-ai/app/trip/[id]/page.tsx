@@ -397,10 +397,10 @@ export default function TripDashboard() {
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-70 transition-all"
                 style={
                   saveState === "saved"
-                    ? { background: "rgba(15,23,42,0.06)", color: "#0f172a", border: "1px solid #e2e8f0" }
+                    ? { background: "rgba(24,170,239,0.12)", color: "#18AAEF", border: "1px solid rgba(24,170,239,0.3)" }
                     : saveState === "error"
                     ? { background: "#ef4444", color: "#ffffff", border: "none" }
-                    : { background: "#ffffff", color: "#0f172a", border: "none" }
+                    : { background: "#0f0f0f", color: "#ffffff", border: "none", boxShadow: "0 4px 16px rgba(0,0,0,0.2)" }
                 }
               >
                 <SaveIcon className="w-4 h-4" />
@@ -465,11 +465,9 @@ export default function TripDashboard() {
                   flexShrink: 0, padding: "8px 16px", borderRadius: 14,
                   fontSize: 12, fontFamily: "var(--v-font-ui)", fontWeight: 500,
                   cursor: "pointer", border: "none", transition: "all 0.2s",
-                  background: activeTab === tab.id
-                    ? "linear-gradient(135deg, var(--v-violet), var(--v-sky-deep))"
-                    : "transparent",
+                  background: activeTab === tab.id ? "#0f0f0f" : "transparent",
                   color: activeTab === tab.id ? "#fff" : "var(--v-slate-2)",
-                  boxShadow: activeTab === tab.id ? "0 4px 12px rgba(124,92,255,0.35)" : "none",
+                  boxShadow: activeTab === tab.id ? "0 3px 12px rgba(0,0,0,0.18)" : "none",
                 }}
               >
                 {tab.label}

@@ -93,7 +93,7 @@ export default function FlightsPage() {
       <div className="pt-28 pb-20 px-4 max-w-4xl mx-auto">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f0fdfb] border border-[#99f6e4] text-[#007a6a] text-xs font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-medium mb-4">
             <Plane className="w-3 h-3" />
             Flight Search
           </div>
@@ -207,7 +207,7 @@ export default function FlightsPage() {
                         </div>
                         <div className="relative w-24 flex items-center">
                           <div className="w-full h-px bg-slate-200" />
-                          <Plane className="w-3 h-3 text-[#00a896] absolute left-1/2 -translate-x-1/2 -translate-y-0.5" />
+                          <Plane className="w-3 h-3 text-slate-400 absolute left-1/2 -translate-x-1/2 -translate-y-0.5" />
                         </div>
                         <p className="text-slate-400 text-xs">{seg?.carrierCode}{seg?.number}</p>
                       </div>
