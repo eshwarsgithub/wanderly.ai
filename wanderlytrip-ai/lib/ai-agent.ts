@@ -2,6 +2,8 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { z } from "zod";
 import { getModelForTask } from "./model-router";
 import { normalizeContent } from "./parse-ai-json";
+import { getWeatherForecast } from "./weather";
+import type { WeatherDay } from "./weather";
 
 // Structured schema for a single activity in the itinerary
 export interface Activity {
@@ -250,6 +252,14 @@ Season awareness:
 - Adjust outdoor activities, clothing recommendations in packingTips, and bestTimeToVisit context based on the travel season
 - Flag seasonal closures, festivals, or weather risks in tips`;
 
+function buildWeatherContext(weather: WeatherDay[]): string {
+  if (!weather.length) return "";
+  const lines = weather.map((w) =>
+    `  ${w.date}: ${w.description}, ${w.tempLowC}–${w.tempHighC}°C, ${w.precipitationChance}% rain`
+  );
+  return `\n\nLive weather forecast (adjust outdoor activities and tips accordingly):\n${lines.join("\n")}`;
+}
+
 function getSeason(date: Date): string {
   const m = date.getMonth() + 1;
   if (m >= 3 && m <= 5) return "spring";
@@ -285,6 +295,10 @@ export async function generateItinerary(input: TripInput): Promise<GeneratedItin
   const persona = getTravelerPersona(input.travelers);
   const perPerson = Math.round(input.budget / Math.max(input.travelers, 1));
 
+  // Fetch live weather if trip is within forecast window (silent fail)
+  const weatherDays = await getWeatherForecast(input.destination, input.startDate, days).catch(() => [] as WeatherDay[]);
+  const weatherContext = buildWeatherContext(weatherDays);
+
   const userPrompt = `Plan a ${input.vibe} trip: ${destinationDesc}.
 
 Trip context:
@@ -292,7 +306,7 @@ Trip context:
 - Total days: ${days}
 - Travelers: ${input.travelers} (${persona})
 - Total budget: $${input.budget} USD ($${perPerson}/person)
-- Vibe: ${input.vibe}${cityFieldNote}
+- Vibe: ${input.vibe}${cityFieldNote}${weatherContext}
 
 Apply persona-appropriate activity choices, season-aware packing tips, and vibe-specific tone throughout.
 Generate the complete itinerary JSON now.`;
