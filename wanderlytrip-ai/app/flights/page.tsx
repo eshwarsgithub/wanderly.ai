@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { motion } from "framer-motion";
-import { Plane, ArrowRight, Clock, Users, Search, AlertCircle, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plane, ArrowRight, Clock, Users, Search, AlertCircle, Sparkles, Bell, BellOff, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import type { FlightOffer } from "@/lib/amadeus";
+import { saveFlightAlert, deleteFlightAlert, getUser } from "@/lib/supabase";
 
 interface SearchResult {
   flights: FlightOffer[];
@@ -67,6 +68,8 @@ export default function FlightsPage() {
   const [isDemo, setIsDemo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({ origin: "", destination: "", date: "", adults: 1 });
+  const [trackedIds, setTrackedIds] = useState<Record<string, string>>({}); // flightId -> alertId
+  const [trackingId, setTrackingId] = useState<string | null>(null);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -85,6 +88,36 @@ export default function FlightsPage() {
         setSearched(true);
       }
     });
+  }
+
+  async function handleTrack(flight: FlightOffer) {
+    const seg = flight.itineraries[0]?.segments[0];
+    const flightKey = flight.id;
+
+    if (trackedIds[flightKey]) {
+      // Already tracked — remove alert
+      try {
+        await deleteFlightAlert(trackedIds[flightKey]);
+        setTrackedIds(prev => { const n = { ...prev }; delete n[flightKey]; return n; });
+      } catch { /* silent */ }
+      return;
+    }
+
+    setTrackingId(flightKey);
+    try {
+      const user = await getUser();
+      if (!user) { window.alert("Sign in to track flight prices."); return; }
+      const saved = await saveFlightAlert({
+        user_id: user.id,
+        origin: seg?.departure.iataCode ?? form.origin,
+        destination: seg?.arrival.iataCode ?? form.destination,
+        departure_date: seg?.departure.at?.split("T")[0] ?? form.date,
+        adults: form.adults,
+      });
+      setTrackedIds(prev => ({ ...prev, [flightKey]: saved.id }));
+    } catch { /* silent */ } finally {
+      setTrackingId(null);
+    }
   }
 
   return (
@@ -222,16 +255,39 @@ export default function FlightsPage() {
                         <Users className="w-3 h-3" />
                         {flight.numberOfBookableSeats} seats left
                       </div>
-                      <motion.a
-                        href={bookUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ scale: 1.04 }}
-                        whileTap={{ scale: 0.96 }}
-                        className="mt-2 inline-flex items-center gap-1 text-xs text-white bg-[#0f172a] px-3 py-1.5 rounded-lg font-medium hover:bg-[#1e293b] transition-colors"
-                      >
-                        Book on Skyscanner <ArrowRight className="w-3 h-3" />
-                      </motion.a>
+                      <div className="mt-2 flex items-center gap-2">
+                        <motion.a
+                          href={bookUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          whileHover={{ scale: 1.04 }}
+                          whileTap={{ scale: 0.96 }}
+                          className="inline-flex items-center gap-1 text-xs text-white bg-[#0f172a] px-3 py-1.5 rounded-lg font-medium hover:bg-[#1e293b] transition-colors"
+                        >
+                          Book on Skyscanner <ArrowRight className="w-3 h-3" />
+                        </motion.a>
+                        <AnimatePresence>
+                          <motion.button
+                            key={trackedIds[flight.id] ? "tracked" : "untracked"}
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            onClick={() => handleTrack(flight)}
+                            disabled={trackingId === flight.id}
+                            title={trackedIds[flight.id] ? "Stop tracking" : "Track price"}
+                            className={`inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg font-medium transition-colors disabled:opacity-50 ${
+                              trackedIds[flight.id]
+                                ? "text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100"
+                                : "text-slate-600 bg-slate-100 border border-slate-200 hover:bg-slate-200"
+                            }`}
+                          >
+                            {trackedIds[flight.id]
+                              ? <><Check className="w-3 h-3" /> Tracked</>
+                              : trackingId === flight.id
+                              ? <Bell className="w-3 h-3 animate-pulse" />
+                              : <><Bell className="w-3 h-3" /> Track</>}
+                          </motion.button>
+                        </AnimatePresence>
+                      </div>
                     </div>
                   </div>
                 </motion.div>

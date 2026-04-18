@@ -3,27 +3,37 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Bookmark, Calendar, DollarSign, Globe, Trash2, Plus, AlertTriangle } from "lucide-react";
+import { Bookmark, Calendar, DollarSign, Globe, Trash2, Plus, AlertTriangle, Bell, BellOff, Plane } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { loadTrips, deleteTrip, getUser, type TripRecord } from "@/lib/supabase";
+import { loadTrips, deleteTrip, getUser, loadFlightAlerts, deleteFlightAlert, type TripRecord, type FlightAlert } from "@/lib/supabase";
 
 export default function SavedPage() {
   const [trips, setTrips] = useState<TripRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [flightAlerts, setFlightAlerts] = useState<FlightAlert[]>([]);
 
   useEffect(() => {
     (async () => {
       const user = await getUser();
       if (user) {
         setUserId(user.id);
-        const saved = await loadTrips(user.id);
+        const [saved, alerts] = await Promise.all([
+          loadTrips(user.id),
+          loadFlightAlerts(user.id).catch(() => [] as FlightAlert[]),
+        ]);
         setTrips(saved);
+        setFlightAlerts(alerts);
       }
       setLoading(false);
     })();
   }, []);
+
+  async function handleDeleteAlert(id: string) {
+    await deleteFlightAlert(id).catch(() => {});
+    setFlightAlerts(prev => prev.filter(a => a.id !== id));
+  }
 
   async function handleDelete(tripId: string) {
     await deleteTrip(tripId);
@@ -92,6 +102,46 @@ export default function SavedPage() {
               </button>
             </Link>
           </div>
+        )}
+
+        {/* Flight price alerts */}
+        {userId && !loading && flightAlerts.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+            <div className="flex items-center gap-2 mb-4">
+              <Bell className="w-4 h-4 text-amber-500" />
+              <h2 className="text-[#0f172a] font-bold text-lg">Flight Alerts</h2>
+              <span className="text-xs text-slate-400 font-medium px-2 py-0.5 rounded-full bg-slate-100">
+                {flightAlerts.length}
+              </span>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {flightAlerts.map((alert) => (
+                <div key={alert.id}
+                  className="group relative bg-white rounded-2xl border border-slate-200 p-4 hover:border-amber-200 hover:shadow-sm transition-all duration-200">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center flex-shrink-0">
+                      <Plane className="w-4 h-4 text-amber-500" />
+                    </div>
+                    <div>
+                      <p className="text-[#0f172a] font-bold text-sm">{alert.origin} → {alert.destination}</p>
+                      <p className="text-slate-400 text-xs">{alert.departure_date} · {alert.adults} pax</p>
+                    </div>
+                  </div>
+                  {alert.last_price != null ? (
+                    <p className="text-slate-500 text-xs">Last seen: <span className="font-semibold text-[#0f172a]">${alert.last_price}</span></p>
+                  ) : (
+                    <p className="text-slate-400 text-xs italic">Awaiting first check…</p>
+                  )}
+                  <button
+                    onClick={() => handleDeleteAlert(alert.id)}
+                    className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity w-7 h-7 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center text-red-400 hover:bg-red-100"
+                  >
+                    <BellOff className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </motion.div>
         )}
 
         {/* Trip gallery */}

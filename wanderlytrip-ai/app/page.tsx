@@ -15,12 +15,31 @@ const SUGGESTIONS = [
 ];
 
 const DESTINATIONS = [
-  { idx: "01", name: "Kyoto",     country: "Japan",   season: "Spring", nights: "7 nights", price: "from $4,800", temp: "14°", plate: "v-plate-dusk",  tag: "quiet" },
-  { idx: "02", name: "Puglia",    country: "Italy",   season: "Summer", nights: "6 nights", price: "from $5,200", temp: "27°", plate: "v-plate-sand",  tag: "slow" },
-  { idx: "03", name: "Patagonia", country: "Chile",   season: "Autumn", nights: "10 nights", price: "from $7,900", temp: "9°", plate: "v-plate-moss",  tag: "remote" },
-  { idx: "04", name: "Marrakesh", country: "Morocco", season: "Spring", nights: "5 nights", price: "from $3,400", temp: "21°", plate: "v-plate-blush", tag: "textile" },
-  { idx: "05", name: "Faroe",     country: "Denmark", season: "Summer", nights: "6 nights", price: "from $6,100", temp: "12°", plate: "v-plate-brume", tag: "elemental" },
-  { idx: "06", name: "Oaxaca",    country: "Mexico",  season: "Winter", nights: "8 nights", price: "from $4,200", temp: "22°", plate: "v-plate-dune",  tag: "craft" },
+  { idx: "01", name: "Kyoto",     country: "Japan",   season: "Spring", nights: "7 nights",  price: "from $4,800", temp: "14°", tag: "quiet",    imageQuery: "kyoto japan temple cherry blossom" },
+  { idx: "02", name: "Puglia",    country: "Italy",   season: "Summer", nights: "6 nights",  price: "from $5,200", temp: "27°", tag: "slow",     imageQuery: "puglia italy whitewashed trulli countryside" },
+  { idx: "03", name: "Patagonia", country: "Chile",   season: "Autumn", nights: "10 nights", price: "from $7,900", temp: "9°",  tag: "remote",   imageQuery: "patagonia torres del paine mountain landscape" },
+  { idx: "04", name: "Marrakesh", country: "Morocco", season: "Spring", nights: "5 nights",  price: "from $3,400", temp: "21°", tag: "textile",  imageQuery: "marrakesh morocco riad medina colorful" },
+  { idx: "05", name: "Faroe",     country: "Denmark", season: "Summer", nights: "6 nights",  price: "from $6,100", temp: "12°", tag: "elemental",imageQuery: "faroe islands dramatic cliffs ocean fog" },
+  { idx: "06", name: "Oaxaca",    country: "Mexico",  season: "Winter", nights: "8 nights",  price: "from $4,200", temp: "22°", tag: "craft",    imageQuery: "oaxaca mexico colonial architecture colourful" },
+];
+
+const JOURNAL_ENTRIES = [
+  { no: "№ 028", kicker: "Dispatch · Kyoto",   title: "On the quiet of Arashiyama at six.",      words: "1,420 words · 6 min read", imageQuery: "arashiyama bamboo forest kyoto morning mist" },
+  { no: "№ 027", kicker: "Letter · Puglia",     title: "Four tables, all masseria, none booked.", words: "980 words · 4 min read",   imageQuery: "masseria puglia olive grove table outdoor dining" },
+  { no: "№ 026", kicker: "Field notes · Faroe", title: "What the fog taught us about pacing.",    words: "2,110 words · 9 min read", imageQuery: "faroe islands fog misty landscape dramatic" },
+];
+
+const MARQUEE_QUERIES = [
+  "santorini greece whitewashed",
+  "bali rice terraces sunrise",
+  "swiss alps mountain snow",
+  "venice canal gondola",
+  "kyoto geisha lantern night",
+  "new york city skyline",
+  "morocco desert camel",
+  "iceland northern lights aurora",
+  "amalfi coast italy cliff",
+  "tokyo street neon night",
 ];
 
 export default function LandingPage() {
@@ -177,6 +196,34 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════
+          PHOTO MARQUEE STRIP
+      ══════════════════════════════════════════════════════════ */}
+      <div style={{ overflow: "hidden", borderTop: "1px solid var(--v-line)", borderBottom: "1px solid var(--v-line)", margin: "0 0 0 0", position: "relative" }}>
+        {/* Fade edges */}
+        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 120, background: "linear-gradient(to right, var(--v-bg), transparent)", zIndex: 2, pointerEvents: "none" }} />
+        <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 120, background: "linear-gradient(to left, var(--v-bg), transparent)", zIndex: 2, pointerEvents: "none" }} />
+        {/* Double track for seamless loop */}
+        <div style={{ display: "flex", animation: "v-marquee 40s linear infinite", willChange: "transform" }}>
+          {[...MARQUEE_QUERIES, ...MARQUEE_QUERIES].map((q, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={i}
+              src={`/api/images?query=${encodeURIComponent(q)}&seed=${i}`}
+              alt={q}
+              style={{
+                width: 280, height: 160, objectFit: "cover", flexShrink: 0,
+                borderRight: "1px solid var(--v-line)",
+                filter: "grayscale(15%) contrast(1.05)",
+                transition: "filter 0.4s",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.filter = "grayscale(0%) contrast(1.1)")}
+              onMouseLeave={e => (e.currentTarget.style.filter = "grayscale(15%) contrast(1.05)")}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════
           §01 — THREE MOVEMENTS
       ══════════════════════════════════════════════════════════ */}
       <section id="how" style={{ padding: "120px 0", position: "relative" }}>
@@ -237,20 +284,38 @@ export default function LandingPage() {
               <article key={d.idx}
                 onMouseEnter={() => setActiveD(i)}
                 style={{ cursor: "pointer", transition: "transform 0.6s cubic-bezier(0.22,1,0.36,1)" }}>
-                <div className={`v-plate ${d.plate} v-plate-sheen`} style={{
+                {/* Photo card */}
+                <div style={{
+                  position: "relative", overflow: "hidden", borderRadius: 4,
                   aspectRatio: i === 1 || i === 4 ? "3 / 4.3" : "3 / 4",
                   transition: "transform 0.8s cubic-bezier(0.22,1,0.36,1)",
                   transform: activeD === i ? "scale(1.01)" : "scale(1)",
-                  color: "white",
+                  background: "#111",
                 }}>
-                  <div className="v-mono" style={{ position: "absolute", top: 14, left: 14, fontSize: 10, letterSpacing: "0.1em", opacity: 0.7 }}>{d.idx} / 06</div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/api/images?query=${encodeURIComponent(d.imageQuery)}&seed=${i}`}
+                    alt={d.name}
+                    style={{
+                      position: "absolute", inset: 0, width: "100%", height: "100%",
+                      objectFit: "cover",
+                      transition: "transform 0.8s cubic-bezier(0.22,1,0.36,1), filter 0.4s",
+                      transform: activeD === i ? "scale(1.06)" : "scale(1)",
+                      filter: activeD === i ? "brightness(0.7)" : "brightness(0.6) contrast(1.1)",
+                    }}
+                  />
+                  {/* Overlay gradient */}
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)" }} />
+                  {/* Top meta */}
+                  <div className="v-mono" style={{ position: "absolute", top: 14, left: 14, fontSize: 10, letterSpacing: "0.1em", color: "rgba(255,255,255,0.7)" }}>{d.idx} / 06</div>
                   <div style={{ position: "absolute", top: 14, right: 14 }}>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "4px 10px", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 999, color: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)" }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "4px 10px", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 999, color: "rgba(255,255,255,0.9)", backdropFilter: "blur(8px)", background: "rgba(0,0,0,0.2)" }}>
                       {d.tag}
                     </span>
                   </div>
-                  <div style={{ position: "absolute", left: 24, right: 24, bottom: 24 }}>
-                    <div className="v-mono" style={{ fontSize: 10, opacity: 0.6, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                  {/* Bottom text */}
+                  <div style={{ position: "absolute", left: 24, right: 24, bottom: 24, color: "white" }}>
+                    <div className="v-mono" style={{ fontSize: 10, opacity: 0.65, letterSpacing: "0.14em", textTransform: "uppercase" }}>
                       {d.country} · {d.season} · {d.temp}
                     </div>
                     <div className="v-display" style={{ fontSize: "clamp(2rem,3.2vw,2.8rem)", lineHeight: 1, letterSpacing: "-0.02em", marginTop: 8 }}>{d.name}</div>
@@ -321,15 +386,30 @@ export default function LandingPage() {
             </a>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 0 }}>
-            {[
-              { no: "№ 028", kicker: "Dispatch · Kyoto",  title: "On the quiet of Arashiyama at six.",      words: "1,420 words · 6 min read", plate: "v-plate-dusk" },
-              { no: "№ 027", kicker: "Letter · Puglia",   title: "Four tables, all masseria, none booked.", words: "980 words · 4 min read",   plate: "v-plate-sand" },
-              { no: "№ 026", kicker: "Field notes · Faroe","title": "What the fog taught us about pacing.",  words: "2,110 words · 9 min read", plate: "v-plate-brume" },
-            ].map((e, i) => (
+            {JOURNAL_ENTRIES.map((e, i) => (
               <article key={e.no} style={{ padding: `0 ${i === 0 ? 0 : 36}px`, paddingRight: i === 2 ? 0 : 36, borderRight: i < 2 ? "1px solid var(--v-line)" : "none", cursor: "pointer" }}>
-                <div className={`v-plate ${e.plate} v-plate-sheen`} style={{ aspectRatio: "4 / 3", borderRadius: 4, color: "white" }}>
-                  <div className="v-mono" style={{ position: "absolute", top: 14, left: 14, fontSize: 10, letterSpacing: "0.14em", opacity: 0.7 }}>{e.no}</div>
-                  <div className="v-mono" style={{ position: "absolute", bottom: 14, left: 14, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", opacity: 0.85 }}>photograph · black & white</div>
+                <div style={{ position: "relative", overflow: "hidden", borderRadius: 4, aspectRatio: "4 / 3", background: "#111" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/api/images?query=${encodeURIComponent(e.imageQuery)}&seed=${i + 10}`}
+                    alt={e.kicker}
+                    style={{
+                      position: "absolute", inset: 0, width: "100%", height: "100%",
+                      objectFit: "cover", filter: "grayscale(20%) contrast(1.08) brightness(0.75)",
+                      transition: "transform 0.7s cubic-bezier(0.22,1,0.36,1), filter 0.4s",
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.transform = "scale(1.05)";
+                      e.currentTarget.style.filter = "grayscale(0%) contrast(1.05) brightness(0.72)";
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.transform = "scale(1)";
+                      e.currentTarget.style.filter = "grayscale(20%) contrast(1.08) brightness(0.75)";
+                    }}
+                  />
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)" }} />
+                  <div className="v-mono" style={{ position: "absolute", top: 14, left: 14, fontSize: 10, letterSpacing: "0.14em", color: "rgba(255,255,255,0.75)" }}>{e.no}</div>
+                  <div className="v-mono" style={{ position: "absolute", bottom: 14, left: 14, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)" }}>photograph</div>
                 </div>
                 <div className="v-eyebrow" style={{ marginTop: 24, color: "var(--v-violet)" }}>{e.kicker}</div>
                 <h3 style={{ marginTop: 16, fontFamily: "var(--v-font-display)", fontWeight: 300, fontSize: "clamp(1.4rem,2vw,1.8rem)", letterSpacing: "-0.01em", lineHeight: 1.15, color: "var(--v-ink)" }}>

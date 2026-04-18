@@ -249,3 +249,50 @@ export async function loadTripByToken(token: string): Promise<TripRecord | null>
   if (error) return null;
   return data as TripRecord;
 }
+
+// ── Flight price alerts ──────────────────────────────────────────────────────
+
+export interface FlightAlert {
+  id: string;
+  user_id: string;
+  origin: string;
+  destination: string;
+  departure_date: string;
+  adults: number;
+  last_price: number | null;
+  last_checked_at: string | null;
+  created_at: string;
+}
+
+export async function saveFlightAlert(
+  alert: Omit<FlightAlert, "id" | "created_at" | "last_price" | "last_checked_at">
+): Promise<FlightAlert> {
+  const db = getSupabase();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (db.from("flight_alerts") as any)
+    .insert(alert)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as FlightAlert;
+}
+
+export async function loadFlightAlerts(userId: string): Promise<FlightAlert[]> {
+  const db = getSupabase();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (db.from("flight_alerts") as any)
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as FlightAlert[];
+}
+
+export async function deleteFlightAlert(id: string): Promise<void> {
+  const db = getSupabase();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (db.from("flight_alerts") as any)
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
+}
