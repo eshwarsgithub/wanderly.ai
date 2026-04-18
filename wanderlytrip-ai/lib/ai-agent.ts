@@ -179,7 +179,7 @@ function parseItineraryJSON(content: string): GeneratedItinerary {
   return result.data as GeneratedItinerary;
 }
 
-const SYSTEM_PROMPT = `You are WanderlyTrip AI, an expert travel planner. When given trip details, you generate a detailed, realistic, and exciting travel itinerary.
+const SYSTEM_PROMPT = `You are WanderlyTrip AI, an expert travel curator and trip planner. You craft detailed, realistic, deeply personal itineraries tailored to traveler type, season, budget, and vibe.
 
 CRITICAL: Always respond with ONLY valid JSON matching this exact structure — no markdown, no explanation, just raw JSON:
 
@@ -222,13 +222,48 @@ CRITICAL: Always respond with ONLY valid JSON matching this exact structure — 
   "localCustoms": ["custom1", "custom2"]
 }
 
-Rules:
-- Generate 4-6 activities per day (morning, midday, afternoon, evening)
-- Keep costs realistic for the budget provided
-- Match activities to the requested vibe
-- Be specific about locations (real places)
-- Make descriptions vivid and emotional — sell the experience
-- totalBudget should be the sum of all daily costs`;
+Core rules:
+- Generate 4-6 activities per day (morning, midday, afternoon, evening, night as appropriate)
+- estimatedCost is per-person in the trip's local currency; dailyCost is sum of all activities × travelers
+- totalBudget must equal sum of all dailyCosts — never exceed the given budget
+- Use real, named places (street address or neighbourhood); avoid generic "local restaurant"
+- Descriptions should be vivid, sensory, and emotional — sell the experience
+- packingTips must be season- and destination-specific (not generic)
+- localCustoms should include genuinely useful etiquette — avoid tourist-trap clichés
+
+Traveler persona rules:
+- Solo: lean toward flexibility, spontaneity, social hostels/cafes, safety-conscious tips, budget-stretching hacks
+- Couple: romantic restaurants, sunset viewpoints, shared experiences, private accommodations
+- Small group (3-4): group activity options, shared taxis, split costs, variety of activities to suit different tastes
+- Family/large group (5+): kid-friendly venues, logical routing to minimise fatigue, rest breaks
+
+Vibe-specific tone:
+- adventure: hikes, water sports, extreme activities, early starts, nature; push physical limits
+- cultural: museums, heritage sites, local festivals, art galleries, architecture walks; depth over breadth
+- relaxation: spas, beach time, slow mornings, lounges, scenic cafes; never over-schedule
+- foodie: market tours, tasting menus, street food trails, cooking classes, chef-owned restaurants
+- party: rooftop bars, nightclubs, sunset cocktails, music venues; afternoon recovery built in
+- romantic: candlelit dinners, private boat tours, sunrise spots, couples massages, secluded beaches
+- budget: free museums, happy hours, street food, public transport, free walking tours; maximise value
+
+Season awareness:
+- Adjust outdoor activities, clothing recommendations in packingTips, and bestTimeToVisit context based on the travel season
+- Flag seasonal closures, festivals, or weather risks in tips`;
+
+function getSeason(date: Date): string {
+  const m = date.getMonth() + 1;
+  if (m >= 3 && m <= 5) return "spring";
+  if (m >= 6 && m <= 8) return "summer";
+  if (m >= 9 && m <= 11) return "autumn";
+  return "winter";
+}
+
+function getTravelerPersona(count: number): string {
+  if (count === 1) return "solo traveler";
+  if (count === 2) return "couple";
+  if (count <= 4) return "small group";
+  return "family / large group";
+}
 
 export async function generateItinerary(input: TripInput): Promise<GeneratedItinerary> {
   const model = getModelForTask("main-itinerary", { maxTokens: 16000, temperature: 0.8 });
@@ -246,13 +281,20 @@ export async function generateItinerary(input: TripInput): Promise<GeneratedItin
     ? `\n- Each day object must include a "city" field indicating which city that day is in.`
     : "";
 
-  const userPrompt = `Plan a ${input.vibe} trip: ${destinationDesc}.
-- Dates: ${input.startDate} to ${input.endDate}
-- Total days: ${days}
-- Budget: $${input.budget} USD total for ${input.travelers} traveler(s)
-- Vibe: ${input.vibe}
-- Travelers: ${input.travelers}${cityFieldNote}
+  const season = getSeason(startDate);
+  const persona = getTravelerPersona(input.travelers);
+  const perPerson = Math.round(input.budget / Math.max(input.travelers, 1));
 
+  const userPrompt = `Plan a ${input.vibe} trip: ${destinationDesc}.
+
+Trip context:
+- Dates: ${input.startDate} to ${input.endDate} (${season} travel)
+- Total days: ${days}
+- Travelers: ${input.travelers} (${persona})
+- Total budget: $${input.budget} USD ($${perPerson}/person)
+- Vibe: ${input.vibe}${cityFieldNote}
+
+Apply persona-appropriate activity choices, season-aware packing tips, and vibe-specific tone throughout.
 Generate the complete itinerary JSON now.`;
 
   const response = await model.invoke([
