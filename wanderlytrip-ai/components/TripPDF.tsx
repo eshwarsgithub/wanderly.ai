@@ -16,61 +16,78 @@ Font.register({
   ],
 });
 
-const TEAL = "#00c4aa";
-const DARK = "#0a0a0a";
-const GRAY = "#666666";
-const LIGHT_GRAY = "#f0f0f0";
+const INK = "#0f0f0f";
+const SLATE = "#475569";
+const MUTED = "#94a3b8";
+const RULE = "#e2e8f0";
+const SURFACE = "#f8fafc";
+const AMBER = "#F59E0B";
 
 const styles = StyleSheet.create({
-  page: { fontFamily: "Inter", backgroundColor: "#ffffff", padding: 40, fontSize: 10, color: DARK },
-  header: { marginBottom: 24, paddingBottom: 16, borderBottom: `2px solid ${TEAL}` },
-  brandRow: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
-  brand: { fontSize: 14, fontWeight: 700, color: TEAL },
-  title: { fontSize: 28, fontWeight: 700, color: DARK, marginBottom: 6 },
-  subtitle: { fontSize: 11, color: GRAY, lineHeight: 1.5 },
-  statsRow: { flexDirection: "row", gap: 16, marginTop: 12 },
-  stat: { backgroundColor: LIGHT_GRAY, padding: "6 10", borderRadius: 6 },
-  statLabel: { fontSize: 8, color: GRAY, marginBottom: 2 },
-  statValue: { fontSize: 11, fontWeight: 700, color: DARK },
-  section: { marginBottom: 20 },
-  sectionTitle: { fontSize: 13, fontWeight: 700, color: TEAL, marginBottom: 10, paddingBottom: 4, borderBottom: `1px solid ${LIGHT_GRAY}` },
-  dayBlock: { marginBottom: 14, padding: 10, backgroundColor: LIGHT_GRAY, borderRadius: 6 },
-  dayHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
-  dayTitle: { fontSize: 11, fontWeight: 700, color: DARK },
-  dayMeta: { fontSize: 9, color: GRAY },
-  activityRow: { flexDirection: "row", gap: 8, marginBottom: 6, paddingBottom: 6, borderBottom: `1px solid #e0e0e0` },
-  activityTime: { width: 40, fontSize: 9, color: TEAL, fontWeight: 700, flexShrink: 0 },
+  page: { fontFamily: "Inter", backgroundColor: "#ffffff", padding: "48 48 60 48", fontSize: 10, color: INK },
+
+  header: { marginBottom: 32, paddingBottom: 20, borderBottom: `1px solid ${RULE}` },
+  brandRow: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
+  brand: { fontSize: 11, fontWeight: 700, color: INK, letterSpacing: 1 },
+  brandDot: { fontSize: 11, fontWeight: 700, color: AMBER },
+  title: { fontSize: 32, fontWeight: 700, color: INK, lineHeight: 1.1, marginBottom: 8 },
+  subtitle: { fontSize: 10, color: SLATE, lineHeight: 1.6, maxWidth: 420 },
+  statsRow: { flexDirection: "row", gap: 12, marginTop: 16 },
+  stat: { backgroundColor: SURFACE, padding: "7 12", borderRadius: 6, borderLeft: `2px solid ${INK}` },
+  statLabel: { fontSize: 7, color: MUTED, marginBottom: 2, textTransform: "uppercase", letterSpacing: 0.8 },
+  statValue: { fontSize: 10, fontWeight: 700, color: INK },
+
+  section: { marginBottom: 24 },
+  sectionTitle: { fontSize: 9, fontWeight: 700, color: INK, marginBottom: 12, paddingBottom: 6, borderBottom: `1px solid ${RULE}`, textTransform: "uppercase", letterSpacing: 1.2 },
+
+  dayBlock: { marginBottom: 12, borderRadius: 8, overflow: "hidden", border: `1px solid ${RULE}` },
+  dayHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: "8 12", backgroundColor: INK },
+  dayNumber: { fontSize: 8, fontWeight: 700, color: "#ffffff", opacity: 0.6, marginBottom: 1, textTransform: "uppercase", letterSpacing: 0.8 },
+  dayTitle: { fontSize: 10, fontWeight: 700, color: "#ffffff" },
+  dayMeta: { fontSize: 8, color: "#ffffff", opacity: 0.6 },
+  dayBody: { padding: "10 12" },
+
+  activityRow: { flexDirection: "row", gap: 10, marginBottom: 8, paddingBottom: 8, borderBottom: `1px solid ${RULE}` },
+  activityTime: { width: 36, fontSize: 8, color: MUTED, fontWeight: 700, flexShrink: 0, paddingTop: 1 },
   activityContent: { flex: 1 },
-  activityName: { fontSize: 10, fontWeight: 700, color: DARK },
-  activityDesc: { fontSize: 9, color: GRAY, lineHeight: 1.4, marginTop: 2 },
-  activityCost: { fontSize: 9, color: TEAL, marginTop: 2 },
-  listItem: { flexDirection: "row", gap: 6, marginBottom: 4 },
-  bullet: { fontSize: 10, color: TEAL },
-  listText: { fontSize: 10, color: DARK, lineHeight: 1.4, flex: 1 },
-  footer: { position: "absolute", bottom: 20, left: 40, right: 40, flexDirection: "row", justifyContent: "space-between", borderTop: `1px solid ${LIGHT_GRAY}`, paddingTop: 8 },
-  footerText: { fontSize: 8, color: GRAY },
+  activityName: { fontSize: 10, fontWeight: 700, color: INK, marginBottom: 2 },
+  activityDesc: { fontSize: 8, color: SLATE, lineHeight: 1.5 },
+  activityMeta: { fontSize: 8, color: MUTED, marginTop: 3 },
+
+  listItem: { flexDirection: "row", gap: 8, marginBottom: 5 },
+  bullet: { fontSize: 9, color: MUTED, width: 12, flexShrink: 0, paddingTop: 1 },
+  listText: { fontSize: 9, color: SLATE, lineHeight: 1.5, flex: 1 },
+
+  highlightItem: { flexDirection: "row", gap: 8, marginBottom: 5 },
+  highlightBullet: { fontSize: 9, color: AMBER, width: 12, flexShrink: 0 },
+  highlightText: { fontSize: 9, color: INK, fontWeight: 700, flex: 1, lineHeight: 1.4 },
+
+  footer: { position: "absolute", bottom: 24, left: 48, right: 48, flexDirection: "row", justifyContent: "space-between", borderTop: `1px solid ${RULE}`, paddingTop: 8 },
+  footerText: { fontSize: 7, color: MUTED },
 });
 
 export default function TripPDF({ itinerary }: { itinerary: GeneratedItinerary }) {
   return (
     <Document title={`${itinerary.destination} Itinerary`} author="WanderlyTrip.ai">
-      {/* Page 1: Overview + Day-by-day */}
       <Page size="A4" style={styles.page}>
+        {/* Header */}
         <View style={styles.header}>
           <View style={styles.brandRow}>
-            <Text style={styles.brand}>WanderlyTrip.ai</Text>
+            <Text style={styles.brand}>Wanderly</Text>
+            <Text style={styles.brandDot}>.</Text>
           </View>
           <Text style={styles.title}>{itinerary.destination}</Text>
           <Text style={styles.subtitle}>{itinerary.summary}</Text>
           <View style={styles.statsRow}>
             {[
-              { label: "Duration", value: `${itinerary.totalDays} days` },
-              { label: "Budget", value: `${itinerary.currency} ${itinerary.totalBudget.toLocaleString()}` },
-              { label: "Country", value: itinerary.country },
-              { label: "Vibe", value: itinerary.vibe },
+              { label: "Duration",  value: `${itinerary.totalDays} days` },
+              { label: "Budget",    value: `${itinerary.currency} ${itinerary.totalBudget.toLocaleString()}` },
+              { label: "Country",   value: itinerary.country },
+              { label: "Vibe",      value: itinerary.vibe },
+              { label: "Best time", value: itinerary.bestTimeToVisit },
             ].map(({ label, value }) => (
               <View key={label} style={styles.stat}>
-                <Text style={styles.statLabel}>{label.toUpperCase()}</Text>
+                <Text style={styles.statLabel}>{label}</Text>
                 <Text style={styles.statValue}>{value}</Text>
               </View>
             ))}
@@ -81,9 +98,9 @@ export default function TripPDF({ itinerary }: { itinerary: GeneratedItinerary }
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Highlights</Text>
           {itinerary.highlights.map((h, i) => (
-            <View key={i} style={styles.listItem}>
-              <Text style={styles.bullet}>★</Text>
-              <Text style={styles.listText}>{h}</Text>
+            <View key={i} style={styles.highlightItem}>
+              <Text style={styles.highlightBullet}>★</Text>
+              <Text style={styles.highlightText}>{h}</Text>
             </View>
           ))}
         </View>
@@ -94,24 +111,29 @@ export default function TripPDF({ itinerary }: { itinerary: GeneratedItinerary }
           {itinerary.days.map((day) => (
             <View key={day.day} style={styles.dayBlock} wrap={false}>
               <View style={styles.dayHeader}>
-                <Text style={styles.dayTitle}>Day {day.day} — {day.theme}</Text>
-                <Text style={styles.dayMeta}>{day.date} · {day.mood} · Est. ${day.dailyCost}</Text>
-              </View>
-              {day.activities.map((act) => (
-                <View key={act.id} style={styles.activityRow}>
-                  <Text style={styles.activityTime}>{act.time}</Text>
-                  <View style={styles.activityContent}>
-                    <Text style={styles.activityName}>{act.name}</Text>
-                    <Text style={styles.activityDesc}>{act.description}</Text>
-                    <Text style={styles.activityCost}>{act.location} · ${act.estimatedCost} · {act.duration}</Text>
-                  </View>
+                <View>
+                  <Text style={styles.dayNumber}>Day {day.day}</Text>
+                  <Text style={styles.dayTitle}>{day.theme}</Text>
                 </View>
-              ))}
+                <Text style={styles.dayMeta}>{day.date} · Est. ${day.dailyCost}</Text>
+              </View>
+              <View style={styles.dayBody}>
+                {day.activities.map((act, i) => (
+                  <View key={act.id} style={[styles.activityRow, i === day.activities.length - 1 ? { borderBottom: "none", marginBottom: 0, paddingBottom: 0 } : {}]}>
+                    <Text style={styles.activityTime}>{act.time}</Text>
+                    <View style={styles.activityContent}>
+                      <Text style={styles.activityName}>{act.name}</Text>
+                      <Text style={styles.activityDesc}>{act.description}</Text>
+                      <Text style={styles.activityMeta}>{act.location} · ${act.estimatedCost} · {act.duration}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
             </View>
           ))}
         </View>
 
-        {/* Packing Tips + Local Customs */}
+        {/* Packing Tips */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Packing Tips</Text>
           {itinerary.packingTips.map((tip, i) => (
@@ -122,19 +144,20 @@ export default function TripPDF({ itinerary }: { itinerary: GeneratedItinerary }
           ))}
         </View>
 
+        {/* Local Customs */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Local Customs</Text>
+          <Text style={styles.sectionTitle}>Local Customs &amp; Etiquette</Text>
           {itinerary.localCustoms.map((c, i) => (
             <View key={i} style={styles.listItem}>
-              <Text style={styles.bullet}>•</Text>
+              <Text style={styles.bullet}>—</Text>
               <Text style={styles.listText}>{c}</Text>
             </View>
           ))}
         </View>
 
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>Generated by WanderlyTrip.ai</Text>
-          <Text style={styles.footerText}>{itinerary.destination} · {itinerary.totalDays} days · ${itinerary.totalBudget.toLocaleString()}</Text>
+          <Text style={styles.footerText}>WanderlyTrip.ai · AI-powered travel planning</Text>
+          <Text style={styles.footerText}>{itinerary.destination} · {itinerary.totalDays} days · {itinerary.currency} {itinerary.totalBudget.toLocaleString()}</Text>
         </View>
       </Page>
     </Document>
