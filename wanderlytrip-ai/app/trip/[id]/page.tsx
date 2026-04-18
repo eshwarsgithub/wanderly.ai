@@ -585,6 +585,40 @@ export default function TripDashboard() {
             )}
           </div>
 
+          {/* Mobile Quick Actions — horizontal strip */}
+          <div className="lg:hidden mb-4">
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {[
+                { label: "Share", icon: Share2, onClick: handleShare, disabled: shareState === "sharing" },
+                { label: isExportingPdf ? "Exporting…" : "PDF", icon: Download, onClick: handleExportPdf, disabled: isExportingPdf },
+              ].map(({ label, icon: Icon, onClick, disabled }) => (
+                <button key={label} onClick={onClick} disabled={disabled}
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-50 disabled:opacity-50 transition-colors">
+                  <Icon className="w-3.5 h-3.5" />{label}
+                </button>
+              ))}
+              <Link href={`/guide/${encodeURIComponent(itinerary.destination)}`}>
+                <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-50 transition-colors">
+                  <BookOpen className="w-3.5 h-3.5" />Guide
+                </div>
+              </Link>
+              <Link href="/flights">
+                <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-50 transition-colors">
+                  <Plane className="w-3.5 h-3.5" />Flights
+                </div>
+              </Link>
+              <Link href="/hotels">
+                <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-50 transition-colors">
+                  <MapPin className="w-3.5 h-3.5" />Hotels
+                </div>
+              </Link>
+              <button onClick={() => setShowTripCard(true)}
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-50 transition-colors">
+                <Copy className="w-3.5 h-3.5" />Trip Card
+              </button>
+            </div>
+          </div>
+
           {/* Sidebar */}
           <div className="hidden lg:block space-y-4">
             {/* Map — always visible, reflects active day + nearby places */}

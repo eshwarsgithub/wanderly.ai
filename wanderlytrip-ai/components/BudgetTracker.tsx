@@ -17,7 +17,7 @@ export default function BudgetTracker({ itinerary }: BudgetTrackerProps) {
   const pct = Math.min((totalSpent / totalBudget) * 100, 100);
 
   const barColor =
-    pct < 60 ? "#00c4aa" : pct < 85 ? "#f59e0b" : "#ef4444";
+    pct < 60 ? "#22c55e" : pct < 85 ? "#f59e0b" : "#ef4444";
 
   if (!isOpen) {
     return (
@@ -98,7 +98,7 @@ export default function BudgetTracker({ itinerary }: BudgetTrackerProps) {
                   animate={{ width: `${Math.min(dayPct, 100)}%` }}
                   transition={{ duration: 0.8, delay: i * 0.05 }}
                   className="h-full rounded-full"
-                  style={{ background: "#00c4aa", opacity: 0.6 + i * 0.05 }}
+                  style={{ background: barColor, opacity: 0.5 + Math.min(i * 0.04, 0.4) }}
                 />
               </div>
               <span className="text-slate-500 text-xs w-16 text-right flex-shrink-0">

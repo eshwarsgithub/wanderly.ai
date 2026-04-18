@@ -10,6 +10,7 @@ import NearbyGems from "@/components/NearbyGems";
 import { generateTripAction, parseNLAction } from "@/app/actions/generate-itinerary";
 import { VIBES } from "@/components/VibeSelector";
 import type { DestinationStop } from "@/lib/ai-agent";
+import { getUser, loadProfile } from "@/lib/supabase";
 
 export default function TripForm({ defaultDestination = "" }: { defaultDestination?: string }) {
   const router = useRouter();
@@ -38,6 +39,20 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
   useEffect(() => {
     if (defaultDestination) setForm((p) => ({ ...p, destination: defaultDestination }));
   }, [defaultDestination]);
+
+  // Pre-fill form from saved profile for logged-in users
+  useEffect(() => {
+    (async () => {
+      const user = await getUser().catch(() => null);
+      if (!user) return;
+      const profile = await loadProfile(user.id).catch(() => null);
+      if (!profile) return;
+      setForm((prev) => ({
+        ...prev,
+        vibe: profile.travel_style ?? prev.vibe,
+      }));
+    })();
+  }, []);
 
   function addStop() {
     if (stops.length < 4) setStops([...stops, { city: "", days: 2 }]);

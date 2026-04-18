@@ -15,22 +15,12 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "source.unsplash.com",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-      {
-        protocol: "https",
-        hostname: "maps.googleapis.com",
-      },
-      {
-        protocol: "https",
-        hostname: "openweathermap.org",
-      },
+      { protocol: "https", hostname: "source.unsplash.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "maps.googleapis.com" },
+      { protocol: "https", hostname: "openweathermap.org" },
+      { protocol: "https", hostname: "loremflickr.com" },
+      { protocol: "https", hostname: "api.pexels.com" },
     ],
   },
 };

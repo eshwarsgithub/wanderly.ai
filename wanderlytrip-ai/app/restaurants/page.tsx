@@ -15,6 +15,8 @@ interface Restaurant {
   mustTry: string;
   vibe: string;
   tip: string;
+  photoUrl?: string;
+  googleMapsUrl?: string;
 }
 
 function tripAdvisorUrl(name: string, destination: string): string {
@@ -137,50 +139,72 @@ export default function RestaurantsPage() {
               return (
                 <motion.div key={r.name} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.06 }} whileHover={{ y: -2 }}
-                  className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col hover:shadow-md hover:border-slate-300 transition-all duration-200">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h3 className="text-[#0f172a] font-semibold leading-tight">{r.name}</h3>
-                      <p className="text-slate-400 text-xs mt-0.5">{r.cuisine}</p>
+                  className="bg-white rounded-2xl border border-slate-200 flex flex-col hover:shadow-md hover:border-slate-300 transition-all duration-200 overflow-hidden">
+                  {/* Photo from Google Places */}
+                  {r.photoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={r.photoUrl} alt={r.name} className="w-full h-36 object-cover" />
+                  )}
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-[#0f172a] font-semibold leading-tight">{r.name}</h3>
+                        <p className="text-slate-400 text-xs mt-0.5">{r.cuisine}</p>
+                      </div>
+                      <span className="flex-shrink-0 ml-2 text-xs font-bold px-2 py-0.5 rounded-full"
+                        style={{ background: price.bg, color: price.text, border: `1px solid ${price.border}` }}>
+                        {r.priceRange}
+                      </span>
                     </div>
-                    <span className="flex-shrink-0 ml-2 text-xs font-bold px-2 py-0.5 rounded-full"
-                      style={{ background: price.bg, color: price.text, border: `1px solid ${price.border}` }}>
-                      {r.priceRange}
-                    </span>
-                  </div>
 
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="flex items-center gap-0.5">
-                      {Array.from({ length: 5 }).map((_, j) => (
-                        <Star key={j} className="w-3 h-3"
-                          style={{ color: j < r.rating ? "#f59e0b" : "#e2e8f0" }}
-                          fill={j < r.rating ? "#f59e0b" : "#e2e8f0"} />
-                      ))}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: 5 }).map((_, j) => (
+                          <Star key={j} className="w-3 h-3"
+                            style={{ color: j < r.rating ? "#f59e0b" : "#e2e8f0" }}
+                            fill={j < r.rating ? "#f59e0b" : "#e2e8f0"} />
+                        ))}
+                        <span className="text-slate-400 text-xs ml-1">{r.rating}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-slate-400 text-xs">
+                        <MapPin className="w-3 h-3" />
+                        {r.neighborhood}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 text-slate-400 text-xs">
-                      <MapPin className="w-3 h-3" />
-                      {r.neighborhood}
+
+                    <p className="text-slate-500 text-xs mb-3 italic leading-relaxed">{r.vibe}</p>
+
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 mb-3">
+                      <p className="text-slate-700 text-xs font-medium">Must try: {r.mustTry}</p>
+                    </div>
+
+                    <p className="text-slate-400 text-xs mb-4 flex-1 leading-relaxed">{r.tip}</p>
+
+                    <div className="flex gap-2">
+                      {r.googleMapsUrl && (
+                        <motion.a
+                          href={r.googleMapsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-[#0f172a] bg-slate-100 flex items-center justify-center gap-1.5 hover:bg-slate-200 transition-colors"
+                        >
+                          <MapPin className="w-3 h-3" /> Maps
+                        </motion.a>
+                      )}
+                      <motion.a
+                        href={tripAdvisorUrl(r.name, currentDestination)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white bg-[#0f172a] flex items-center justify-center gap-1.5 hover:bg-[#1e293b] transition-colors"
+                      >
+                        TripAdvisor <ArrowRight className="w-3 h-3" />
+                      </motion.a>
                     </div>
                   </div>
-
-                  <p className="text-slate-500 text-xs mb-3 italic leading-relaxed">{r.vibe}</p>
-
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 mb-3">
-                    <p className="text-slate-700 text-xs font-medium">Must try: {r.mustTry}</p>
-                  </div>
-
-                  <p className="text-slate-400 text-xs mb-4 flex-1 leading-relaxed">{r.tip}</p>
-
-                  <motion.a
-                    href={tripAdvisorUrl(r.name, currentDestination)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full py-2.5 rounded-xl text-xs font-semibold text-white bg-[#0f172a] flex items-center justify-center gap-1.5 hover:bg-[#1e293b] transition-colors"
-                  >
-                    View on TripAdvisor <ArrowRight className="w-3 h-3" />
-                  </motion.a>
                 </motion.div>
               );
             })}

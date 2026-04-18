@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: "Wanderly",
   },
   other: {
-    "theme-color": "#00f5d4",
+    "theme-color": "#0f0f0f",
   },
 };
 
