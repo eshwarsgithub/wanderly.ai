@@ -35,7 +35,11 @@
       "Bash(curl:*)",
       "Bash(python3 -c \"import sys,json; data=sys.stdin.read\\(\\); parts=data.rsplit\\('\\\\n',1\\); body=parts[0]; status=parts[1]; parsed=json.loads\\(body\\); print\\(f'{status} | {len\\(parsed\\)} results | first: {parsed[0][\\\\\"name\\\\\"]} \\({parsed[0][\\\\\"cuisine\\\\\"]}\\)'\\)\")",
       "Bash(python3 -c \"import sys,json; data=sys.stdin.read\\(\\); parts=data.rsplit\\('\\\\n',1\\); body=parts[0]; status=parts[1]; parsed=json.loads\\(body\\); print\\(f'{status} | {len\\(parsed\\)} flights | first: {parsed[0][\\\\\"itineraries\\\\\"][0][\\\\\"segments\\\\\"][0][\\\\\"carrierCode\\\\\"]} \\\\${parsed[0][\\\\\"price\\\\\"][\\\\\"total\\\\\"]}'\\)\")",
-      "Bash(python3 -c \"import sys,json; data=sys.stdin.read\\(\\); parts=data.rsplit\\('\\\\n',1\\); body=parts[0]; status=parts[1]; parsed=json.loads\\(body\\); print\\(f'{status} | {len\\(parsed\\)} hotels | first: {parsed[0][\\\\\"hotel\\\\\"][\\\\\"name\\\\\"]} \\\\${parsed[0][\\\\\"offers\\\\\"][0][\\\\\"price\\\\\"][\\\\\"total\\\\\"]}'\\)\")"
+      "Bash(python3 -c \"import sys,json; data=sys.stdin.read\\(\\); parts=data.rsplit\\('\\\\n',1\\); body=parts[0]; status=parts[1]; parsed=json.loads\\(body\\); print\\(f'{status} | {len\\(parsed\\)} hotels | first: {parsed[0][\\\\\"hotel\\\\\"][\\\\\"name\\\\\"]} \\\\${parsed[0][\\\\\"offers\\\\\"][0][\\\\\"price\\\\\"][\\\\\"total\\\\\"]}'\\)\")",
+      "Bash(grep -E \"\\\\.tsx$|\\\\.ts$\")",
+      "Bash(grep -l \"TripDashboard\" /c/Users/SRINIVAS/OneDrive/Desktop/wanderly.ai/wanderlytrip-ai/components/*.tsx)",
+      "Bash(git diff *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

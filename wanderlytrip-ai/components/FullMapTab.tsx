@@ -219,7 +219,7 @@ export default function FullMapTab({
             placeholder={`Search locations in ${destination}...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-[#0f172a] placeholder:text-slate-400 focus:outline-none focus:border-[#00a896] transition-colors bg-white"
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-[#0f172a] placeholder:text-slate-400 focus:outline-none focus:border-slate-400 transition-colors bg-white"
           />
         </div>
         <button

@@ -33,7 +33,7 @@ export default function LoadingAnimation({ step }: LoadingAnimationProps) {
             className="absolute inset-0 rounded-full border-2 border-slate-100"
             style={{ borderTopColor: "#00f5d4" }}
           />
-          <div className="absolute inset-2 rounded-full bg-[#f0fdfb] border border-[#99f6e4] flex items-center justify-center">
+          <div className="absolute inset-2 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
@@ -42,7 +42,7 @@ export default function LoadingAnimation({ step }: LoadingAnimationProps) {
                 exit={{ opacity: 0, scale: 0.7 }}
                 transition={{ duration: 0.3 }}
               >
-                <Icon className="w-7 h-7 text-[#00a896]" />
+                <Icon className="w-7 h-7 text-slate-500" />
               </motion.div>
             </AnimatePresence>
           </div>

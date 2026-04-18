@@ -53,7 +53,7 @@ export default function MoodBoard({ day, destination }: MoodBoardProps) {
         </div>
         <div>
           <p className="text-slate-400 text-xs">Day cost</p>
-          <p className="font-semibold text-sm" style={{ color: "#00a896" }}>${day.dailyCost}</p>
+          <p className="font-semibold text-sm" style={{ color: "#64748b" }}>${day.dailyCost}</p>
         </div>
       </div>
     </motion.div>

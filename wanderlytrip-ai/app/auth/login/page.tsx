@@ -59,7 +59,7 @@ export default function AuthPage() {
             <Globe className="w-5 h-5 text-[#14b8a6]" />
           </div>
           <span className="font-bold text-[#0f172a] text-xl tracking-tight">
-            Wanderly<span style={{ color: "#00a896" }}>Trip</span>
+            Wanderly<span style={{ color: "#64748b" }}>Trip</span>
             <span className="text-slate-400">.ai</span>
           </span>
         </Link>
@@ -84,7 +84,7 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label className="text-[#0f172a] font-semibold text-sm flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-[#00a896]" /> Email
+                <Mail className="w-3.5 h-3.5 text-slate-500" /> Email
               </Label>
               <Input required type="email" placeholder="you@example.com" value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -93,7 +93,7 @@ export default function AuthPage() {
 
             <div className="space-y-2">
               <Label className="text-[#0f172a] font-semibold text-sm flex items-center gap-2">
-                <Lock className="w-3.5 h-3.5 text-[#00a896]" /> Password
+                <Lock className="w-3.5 h-3.5 text-slate-500" /> Password
               </Label>
               <div className="relative">
                 <Input required type={showPassword ? "text" : "password"} placeholder="••••••••"

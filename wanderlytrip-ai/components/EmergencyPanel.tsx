@@ -33,9 +33,9 @@ function CallButton({ number, label }: { number: string | null; label: string })
       </div>
       <div
         className="w-7 h-7 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform"
-        style={{ background: "#f0fdfb" }}
+        style={{ background: "#f8fafc" }}
       >
-        <Phone className="w-3.5 h-3.5 text-[#00a896]" />
+        <Phone className="w-3.5 h-3.5 text-slate-500" />
       </div>
     </a>
   );
@@ -135,7 +135,7 @@ export default function EmergencyPanel({ destination }: { destination: string })
                       <ul className="space-y-1">
                         {data.safetyTips.map((t, i) => (
                           <li key={i} className="text-slate-600 text-xs flex items-start gap-2">
-                            <span className="text-[#00a896] mt-0.5 flex-shrink-0">✓</span> {t}
+                            <span className="text-slate-500 mt-0.5 flex-shrink-0">✓</span> {t}
                           </li>
                         ))}
                       </ul>

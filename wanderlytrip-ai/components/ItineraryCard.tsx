@@ -8,7 +8,7 @@ const CATEGORY_STYLES: Record<string, { bg: string; text: string; border: string
   food:          { bg: "#fef3c7", text: "#92400e", border: "#fde68a", label: "Food" },
   activity:      { bg: "#ede9fe", text: "#5b21b6", border: "#ddd6fe", label: "Activity" },
   transport:     { bg: "#f0f9ff", text: "#0c4a6e", border: "#bae6fd", label: "Transport" },
-  accommodation: { bg: "#f0fdfb", text: "#065f46", border: "#99f6e4", label: "Stay" },
+  accommodation: { bg: "#f8fafc", text: "#475569", border: "#e2e8f0", label: "Stay" },
   sightseeing:   { bg: "#fce7f3", text: "#9d174d", border: "#fbcfe8", label: "Sightseeing" },
 };
 
@@ -129,7 +129,7 @@ export default function ItineraryCard({ activity, index, isLast, isDraggable = f
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activity.location)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 hover:text-[#00a896] transition-colors"
+                className="flex items-center gap-1 hover:text-slate-500 transition-colors"
               >
                 <MapPin className="w-3 h-3" />
                 {activity.location}
@@ -147,7 +147,7 @@ export default function ItineraryCard({ activity, index, isLast, isDraggable = f
           {/* Tips */}
           {activity.tips && (
             <div className="mt-2.5 pt-2.5 border-t border-slate-50 flex items-start gap-2">
-              <Lightbulb className="w-3.5 h-3.5 text-[#00a896] flex-shrink-0 mt-0.5" />
+              <Lightbulb className="w-3.5 h-3.5 text-slate-500 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-slate-400 italic leading-relaxed">{activity.tips}</p>
             </div>
           )}

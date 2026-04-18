@@ -80,8 +80,8 @@ export default function Phrasebook({ destination }: { destination: string }) {
       {/* Header */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5">
         <div className="flex items-center gap-3 mb-1">
-          <div className="w-9 h-9 rounded-xl bg-[#f0fdfb] flex items-center justify-center">
-            <Languages className="w-4.5 h-4.5 text-[#00a896]" />
+          <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center">
+            <Languages className="w-4.5 h-4.5 text-slate-500" />
           </div>
           <div>
             <h3 className="text-[#0f172a] font-semibold text-sm">Travel Phrasebook</h3>
@@ -128,7 +128,7 @@ export default function Phrasebook({ destination }: { destination: string }) {
               <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-4">
                 <p className="text-[#0f172a] text-sm font-medium">{phrase.english}</p>
                 <p
-                  className="text-[#00a896] text-sm font-semibold"
+                  className="text-slate-500 text-sm font-semibold"
                   style={{ fontFamily: "system-ui, sans-serif" }}
                 >
                   {phrase.local}

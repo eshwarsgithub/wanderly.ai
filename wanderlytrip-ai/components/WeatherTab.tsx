@@ -199,7 +199,7 @@ export default function WeatherTab({
       {advisory?.packingAdditions?.length ? (
         <div
           className="rounded-2xl p-4"
-          style={{ background: "#f0fdfb", border: "1px solid #99f6e4" }}
+          style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}
         >
           <h4 className="text-[#065f46] text-xs font-semibold mb-2 flex items-center gap-1.5">
             <Package className="w-3.5 h-3.5" />

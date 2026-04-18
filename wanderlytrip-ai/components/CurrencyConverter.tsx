@@ -93,7 +93,7 @@ export default function CurrencyConverter({ tripCurrency, totalBudget }: Currenc
     <div className="bg-white rounded-2xl border border-slate-200 p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[#0f172a] font-semibold text-sm flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-[#00a896]" />
+          <DollarSign className="w-4 h-4 text-slate-500" />
           Currency
         </h3>
         {date && (
@@ -111,10 +111,10 @@ export default function CurrencyConverter({ tripCurrency, totalBudget }: Currenc
           {/* Budget in local */}
           <div
             className="rounded-xl p-3 mb-4 text-center"
-            style={{ background: "#f0fdfb" }}
+            style={{ background: "#f8fafc" }}
           >
             <p className="text-slate-400 text-xs mb-0.5">Your ${totalBudget.toLocaleString()} budget</p>
-            <p className="text-[#00a896] font-bold text-xl">
+            <p className="text-slate-500 font-bold text-xl">
               {local.symbol}{budgetInLocal}
             </p>
             <p className="text-slate-400 text-[10px] mt-0.5">{local.name}</p>
@@ -130,7 +130,7 @@ export default function CurrencyConverter({ tripCurrency, totalBudget }: Currenc
                 type="number"
                 value={fromAmount}
                 onChange={(e) => setFromAmount(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-[#0f172a] focus:outline-none focus:border-[#00a896] transition-colors"
+                className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-[#0f172a] focus:outline-none focus:border-slate-400 transition-colors"
                 min="0"
               />
               <span className="text-slate-400 text-xs">{home.code}</span>
@@ -144,7 +144,7 @@ export default function CurrencyConverter({ tripCurrency, totalBudget }: Currenc
               <span className="text-slate-500 text-xs w-8 flex-shrink-0 font-medium">
                 {local.symbol}
               </span>
-              <div className="flex-1 px-3 py-2 rounded-xl border border-slate-100 bg-slate-50 text-sm font-semibold text-[#00a896]">
+              <div className="flex-1 px-3 py-2 rounded-xl border border-slate-100 bg-slate-50 text-sm font-semibold text-slate-500">
                 {toAmount}
               </div>
               <span className="text-slate-400 text-xs">{local.code}</span>

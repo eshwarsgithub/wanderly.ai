@@ -133,7 +133,7 @@ export default function ExplorePage() {
                   borderRadius: 12, outline: "none", fontFamily: "var(--v-font-ui)", fontSize: 13,
                   color: "var(--v-ink)", transition: "border-color 0.2s",
                 }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = "var(--v-violet)")}
+                onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(0,0,0,0.4)")}
                 onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(124,92,255,0.15)")}
               />
             </div>
@@ -278,13 +278,13 @@ export default function ExplorePage() {
                     onClick={() => navigator.clipboard.writeText(`${window.location.origin}/trip/share/${trip.share_slug}`)}
                     title="Copy link"
                     style={{
-                      width: 34, height: 34, borderRadius: 10, border: "1px solid rgba(124,92,255,0.2)",
-                      background: "rgba(124,92,255,0.06)", cursor: "pointer", display: "flex",
-                      alignItems: "center", justifyContent: "center", color: "var(--v-violet)",
+                      width: 34, height: 34, borderRadius: 10, border: "1px solid rgba(0,0,0,0.1)",
+                      background: "rgba(0,0,0,0.04)", cursor: "pointer", display: "flex",
+                      alignItems: "center", justifyContent: "center", color: "var(--v-ink)",
                       transition: "all 0.2s",
                     }}
-                    onMouseOver={(e) => (e.currentTarget.style.background = "rgba(124,92,255,0.12)")}
-                    onMouseOut={(e) => (e.currentTarget.style.background = "rgba(124,92,255,0.06)")}
+                    onMouseOver={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.08)")}
+                    onMouseOut={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.04)")}
                   >
                     <Globe size={13} />
                   </button>

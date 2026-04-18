@@ -82,7 +82,7 @@ const DESTINATIONS = [
 ] as const;
 
 const VIBE_COLORS: Record<string, string> = {
-  culture: "#f0fdfb",
+  culture: "#f8fafc",
   food: "#fef9c3",
   adventure: "#fce7f3",
   relaxation: "#ede9fe",
@@ -93,7 +93,7 @@ const VIBE_COLORS: Record<string, string> = {
   scenic: "#e0f2fe",
 };
 const VIBE_TEXT: Record<string, string> = {
-  culture: "#007a6a",
+  culture: "#475569",
   food: "#92400e",
   adventure: "#9d174d",
   relaxation: "#5b21b6",

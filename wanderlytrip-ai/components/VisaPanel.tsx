@@ -18,14 +18,14 @@ const PASSPORTS = [
 ];
 
 const VISA_STYLES: Record<string, { bg: string; text: string; border: string; label: string }> = {
-  "visa-free":        { bg: "#f0fdfb", text: "#065f46", border: "#99f6e4", label: "Visa Free" },
+  "visa-free":        { bg: "#f8fafc", text: "#475569", border: "#e2e8f0", label: "Visa Free" },
   "visa-on-arrival":  { bg: "#fefce8", text: "#854d0e", border: "#fde68a", label: "Visa on Arrival" },
   "e-visa":           { bg: "#eff6ff", text: "#1e40af", border: "#bfdbfe", label: "e-Visa Required" },
   "visa-required":    { bg: "#fef2f2", text: "#991b1b", border: "#fecaca", label: "Visa Required" },
 };
 
 const WARNING_STYLES: Record<string, { bg: string; text: string; icon: string }> = {
-  safe:    { bg: "#f0fdfb", text: "#065f46", icon: "✅" },
+  safe:    { bg: "#f8fafc", text: "#475569", icon: "✅" },
   caution: { bg: "#fefce8", text: "#854d0e", icon: "⚠️" },
   high:    { bg: "#fef2f2", text: "#991b1b", icon: "🚨" },
 };
@@ -77,7 +77,7 @@ export default function VisaPanel({ destination }: { destination: string }) {
         className="w-full flex items-center justify-between p-5 hover:bg-slate-50 transition-colors"
       >
         <h3 className="text-[#0f172a] font-semibold text-sm flex items-center gap-2">
-          <FileCheck className="w-4 h-4 text-[#00a896]" />
+          <FileCheck className="w-4 h-4 text-slate-500" />
           Visa & Entry
         </h3>
         <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -101,7 +101,7 @@ export default function VisaPanel({ destination }: { destination: string }) {
                 <select
                   value={passport}
                   onChange={(e) => setPassport(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-[#0f172a] focus:outline-none focus:border-[#00a896] bg-white transition-colors"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-[#0f172a] focus:outline-none focus:border-slate-400 bg-white transition-colors"
                 >
                   {PASSPORTS.map((p) => (
                     <option key={p.code} value={p.code}>{p.label}</option>
@@ -150,7 +150,7 @@ export default function VisaPanel({ destination }: { destination: string }) {
                       <ul className="space-y-1">
                         {data.requirements.map((r, i) => (
                           <li key={i} className="flex items-start gap-2 text-slate-600 text-xs">
-                            <span className="text-[#00a896] mt-0.5">•</span> {r}
+                            <span className="text-slate-500 mt-0.5">•</span> {r}
                           </li>
                         ))}
                       </ul>
@@ -175,7 +175,7 @@ export default function VisaPanel({ destination }: { destination: string }) {
                   {data.entryNotes && (
                     <div
                       className="rounded-xl p-3 text-xs leading-relaxed"
-                      style={{ background: "#f0fdfb", color: "#065f46" }}
+                      style={{ background: "#f8fafc", color: "#475569" }}
                     >
                       {data.entryNotes}
                     </div>
@@ -198,7 +198,7 @@ export default function VisaPanel({ destination }: { destination: string }) {
                       href={data.applyAt}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs text-[#00a896] hover:underline font-medium"
+                      className="flex items-center gap-1.5 text-xs text-slate-500 hover:underline font-medium"
                     >
                       <AlertTriangle className="w-3 h-3" />
                       Apply for visa

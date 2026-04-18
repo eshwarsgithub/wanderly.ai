@@ -27,7 +27,7 @@ export default function BudgetTracker({ itinerary }: BudgetTrackerProps) {
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-2xl flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all"
       >
-        <DollarSign className="w-5 h-5 text-[#00a896]" />
+        <DollarSign className="w-5 h-5 text-slate-500" />
       </motion.button>
     );
   }
@@ -41,7 +41,7 @@ export default function BudgetTracker({ itinerary }: BudgetTrackerProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-[#00a896]" />
+          <TrendingUp className="w-4 h-4 text-slate-500" />
           <span className="text-[#0f172a] font-semibold text-sm">Budget Tracker</span>
         </div>
         <button
@@ -110,8 +110,8 @@ export default function BudgetTracker({ itinerary }: BudgetTrackerProps) {
       </div>
 
       {totalSpent < totalBudget && (
-        <div className="mt-4 p-3 rounded-xl bg-[#f0fdfb] border border-[#99f6e4]">
-          <p className="text-[#007a6a] text-xs font-medium">
+        <div className="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p className="text-slate-500 text-xs font-medium">
             ${(totalBudget - totalSpent).toLocaleString()} remaining for extras & shopping
           </p>
         </div>

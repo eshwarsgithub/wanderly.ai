@@ -95,15 +95,15 @@ export default async function GuidePage({
 
         {/* Must-See */}
         <section>
-          <SectionHeader icon={<Eye className="w-4 h-4 text-[#00a896]" />} title="Must-See Attractions" />
+          <SectionHeader icon={<Eye className="w-4 h-4 text-slate-500" />} title="Must-See Attractions" />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
             {guide.mustSee.map((item, i) => {
               const [name, ...rest] = item.split(":");
               return (
                 <div key={i} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md hover:border-slate-300 transition-all">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-6 h-6 rounded-lg bg-[#f0fdfb] border border-[#99f6e4] flex items-center justify-center flex-shrink-0">
-                      <span className="text-[#00a896] text-[10px] font-bold">{i + 1}</span>
+                    <div className="w-6 h-6 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center flex-shrink-0">
+                      <span className="text-slate-500 text-[10px] font-bold">{i + 1}</span>
                     </div>
                     <p className="text-[#0f172a] text-sm font-semibold">{name.trim()}</p>
                   </div>
@@ -147,7 +147,7 @@ export default async function GuidePage({
 
         {/* Food Scene */}
         <section>
-          <SectionHeader icon={<UtensilsCrossed className="w-4 h-4 text-[#00a896]" />} title="Food Scene" />
+          <SectionHeader icon={<UtensilsCrossed className="w-4 h-4 text-slate-500" />} title="Food Scene" />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
             {guide.cuisine.map((item, i) => {
               const [name, ...rest] = item.split(":");
@@ -171,7 +171,7 @@ export default async function GuidePage({
 
         {/* Getting Around */}
         <section>
-          <SectionHeader icon={<Bus className="w-4 h-4 text-[#00a896]" />} title="Getting Around" />
+          <SectionHeader icon={<Bus className="w-4 h-4 text-slate-500" />} title="Getting Around" />
           <div className="mt-4 bg-white rounded-2xl border border-slate-200 p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
             <p className="text-slate-600 text-sm leading-relaxed">{guide.gettingAround}</p>
           </div>

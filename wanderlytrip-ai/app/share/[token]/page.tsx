@@ -22,7 +22,7 @@ export default async function SharedTripPage({ params }: { params: Promise<{ tok
             <Globe className="w-4 h-4 text-[#00f5d4]" />
           </div>
           <span className="font-bold text-[#0f172a] text-sm tracking-tight">
-            Wanderly<span style={{ color: "#00a896" }}>Trip</span>
+            Wanderly<span style={{ color: "#64748b" }}>Trip</span>
             <span className="text-slate-400">.ai</span>
           </span>
         </Link>
@@ -100,13 +100,13 @@ export default async function SharedTripPage({ params }: { params: Promise<{ tok
           <div className="space-y-4">
             <div className="bg-white rounded-2xl border border-slate-200 p-5">
               <h3 className="text-[#0f172a] font-semibold mb-4 text-sm flex items-center gap-2">
-                <Package className="w-4 h-4 text-[#00a896]" /> Packing Tips
+                <Package className="w-4 h-4 text-slate-500" /> Packing Tips
               </h3>
               <ul className="space-y-2.5">
                 {itinerary.packingTips.map((tip, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-slate-600 text-xs leading-relaxed">
-                    <div className="w-4 h-4 rounded-full bg-[#f0fdfb] border border-[#99f6e4] flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-[#00a896] text-[9px] font-bold">{i + 1}</span>
+                    <div className="w-4 h-4 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-slate-500 text-[9px] font-bold">{i + 1}</span>
                     </div>
                     {tip}
                   </li>

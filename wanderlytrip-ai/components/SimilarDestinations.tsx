@@ -42,7 +42,7 @@ export default function SimilarDestinations({
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5">
       <h3 className="text-[#0f172a] font-semibold text-sm mb-4 flex items-center gap-2">
-        <Sparkles className="w-4 h-4 text-[#00a896]" />
+        <Sparkles className="w-4 h-4 text-slate-500" />
         You might also love
       </h3>
 
@@ -74,7 +74,7 @@ export default function SimilarDestinations({
                   <p className="text-[#0f172a] text-sm font-semibold truncate">{s.destination}</p>
                   <span
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full flex-shrink-0 capitalize"
-                    style={{ background: "#f0fdfb", color: "#00a896" }}
+                    style={{ background: "#f8fafc", color: "#64748b" }}
                   >
                     {s.bestFor}
                   </span>
@@ -82,7 +82,7 @@ export default function SimilarDestinations({
                 <p className="text-slate-400 text-xs mt-0.5 line-clamp-2 leading-relaxed">{s.pitch}</p>
                 <div className="flex items-center justify-between mt-1.5">
                   <span className="text-slate-400 text-[10px]">{s.budgetRange}</span>
-                  <span className="text-[#00a896] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                  <span className="text-slate-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
                     Plan trip <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>

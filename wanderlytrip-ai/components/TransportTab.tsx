@@ -119,7 +119,7 @@ export default function TransportTab({
       {/* Overview card */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5">
         <h3 className="text-[#0f172a] font-semibold text-sm mb-2 flex items-center gap-2">
-          <Navigation className="w-4 h-4 text-[#00a896]" />
+          <Navigation className="w-4 h-4 text-slate-500" />
           Getting Around {data.destination}
         </h3>
         <p className="text-slate-500 text-sm leading-relaxed mb-4">{data.overview}</p>
@@ -129,13 +129,13 @@ export default function TransportTab({
           {data.travelCard?.name && (
             <div
               className="rounded-xl p-3 flex items-start gap-3"
-              style={{ background: "#f0fdfb" }}
+              style={{ background: "#f8fafc" }}
             >
-              <CreditCard className="w-4 h-4 text-[#00a896] flex-shrink-0 mt-0.5" />
+              <CreditCard className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-[#0f172a] text-xs font-semibold">{data.travelCard.name}</p>
                 <p className="text-slate-500 text-xs mt-0.5">{data.travelCard.tip}</p>
-                <p className="text-[#00a896] text-xs mt-1 font-medium">~{data.travelCard.avgDailyCost}/day</p>
+                <p className="text-slate-500 text-xs mt-1 font-medium">~{data.travelCard.avgDailyCost}/day</p>
               </div>
             </div>
           )}
@@ -248,7 +248,7 @@ export default function TransportTab({
                           href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(t.from + ", " + itinerary.destination)}&destination=${encodeURIComponent(t.to + ", " + itinerary.destination)}&travelmode=${t.mode === "walk" ? "walking" : t.mode === "metro" ? "transit" : t.mode === "bus" ? "transit" : "driving"}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-[#00a896] hover:underline font-medium"
+                          className="inline-flex items-center gap-1 text-xs text-slate-500 hover:underline font-medium"
                         >
                           Open in Google Maps
                           <ExternalLink className="w-3 h-3" />

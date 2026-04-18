@@ -115,13 +115,13 @@ export default function Navbar() {
                   display: "flex", alignItems: "center", gap: 8,
                   padding: "6px 12px 6px 6px", borderRadius: 999,
                   background: scrolled ? "rgba(255,255,255,0.3)" : "transparent",
-                  border: "1px solid rgba(124,92,255,0.2)", cursor: "pointer",
+                  border: "1px solid rgba(0,0,0,0.1)", cursor: "pointer",
                   fontFamily: "var(--v-font-ui)", fontSize: 13, color: "inherit",
                   transition: "all 0.25s",
                 }}>
                   <div style={{
                     width: 26, height: 26, borderRadius: 999,
-                    background: "linear-gradient(135deg, var(--v-violet), var(--v-sky-deep))",
+                    background: "#0f0f0f",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: "white", fontSize: 11, fontWeight: 700,
                   }}>{avatarLetter}</div>

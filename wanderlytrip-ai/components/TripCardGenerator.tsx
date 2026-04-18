@@ -229,7 +229,7 @@ export default function TripCardGenerator({ itinerary, onClose }: TripCardGenera
         {/* Modal header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <div className="flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-[#00a896]" />
+            <CreditCard className="w-4 h-4 text-slate-500" />
             <span className="text-[#0f172a] font-semibold text-sm">Trip Card</span>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors">

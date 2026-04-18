@@ -133,7 +133,7 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
   const lineInput: React.CSSProperties = {
     background: "transparent",
     border: "none",
-    borderBottom: "1px solid rgba(124,92,255,0.25)",
+    borderBottom: "1px solid rgba(0,0,0,0.15)",
     borderRadius: 0,
     outline: "none",
     width: "100%",
@@ -211,8 +211,8 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
                     value={form.destination}
                     onChange={(e) => setForm({ ...form, destination: e.target.value })}
                     style={lineInput}
-                    onFocus={(e) => (e.currentTarget.style.borderBottomColor = "var(--v-violet)")}
-                    onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(124,92,255,0.25)")}
+                    onFocus={(e) => (e.currentTarget.style.borderBottomColor = "var(--v-ink)")}
+                    onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(0,0,0,0.15)")}
                   />
                 </div>
               ) : (
@@ -221,7 +221,7 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                       <div style={{
                         width: 22, height: 22, borderRadius: 999, flexShrink: 0,
-                        background: "linear-gradient(135deg, var(--v-violet), var(--v-sky-deep))",
+                        background: "#0f0f0f",
                         display: "flex", alignItems: "center", justifyContent: "center",
                         color: "white", fontSize: 10, fontWeight: 700,
                       }}>{i + 1}</div>
@@ -231,8 +231,8 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
                         value={stop.city}
                         onChange={(e) => updateStop(i, "city", e.target.value)}
                         style={{ ...lineInput, flex: 1 }}
-                        onFocus={(e) => (e.currentTarget.style.borderBottomColor = "var(--v-violet)")}
-                        onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(124,92,255,0.25)")}
+                        onFocus={(e) => (e.currentTarget.style.borderBottomColor = "var(--v-ink)")}
+                        onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(0,0,0,0.15)")}
                       />
                       <input
                         type="number" min={1} max={14} value={stop.days}
@@ -252,7 +252,7 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
                       background: "none", border: "none", cursor: "pointer",
                       display: "flex", alignItems: "center", gap: 6,
                       fontFamily: "var(--v-font-mono)", fontSize: 11,
-                      color: "var(--v-violet)", letterSpacing: "0.06em",
+                      color: "#64748b", letterSpacing: "0.06em",
                     }}>
                       <Plus size={11} /> Add city
                     </button>
@@ -269,8 +269,8 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
                     min={new Date().toISOString().split("T")[0]}
                     onChange={(e) => setForm({ ...form, startDate: e.target.value })}
                     style={{ ...lineInput, colorScheme: "light" } as React.CSSProperties}
-                    onFocus={(e) => (e.currentTarget.style.borderBottomColor = "var(--v-violet)")}
-                    onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(124,92,255,0.25)")}
+                    onFocus={(e) => (e.currentTarget.style.borderBottomColor = "var(--v-ink)")}
+                    onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(0,0,0,0.15)")}
                   />
                 </div>
                 <div>
@@ -281,8 +281,8 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
                     min={form.startDate || new Date().toISOString().split("T")[0]}
                     onChange={(e) => setForm({ ...form, endDate: e.target.value })}
                     style={{ ...lineInput, colorScheme: "light" } as React.CSSProperties}
-                    onFocus={(e) => (e.currentTarget.style.borderBottomColor = "var(--v-violet)")}
-                    onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(124,92,255,0.25)")}
+                    onFocus={(e) => (e.currentTarget.style.borderBottomColor = "var(--v-ink)")}
+                    onBlur={(e) => (e.currentTarget.style.borderBottomColor = "rgba(0,0,0,0.15)")}
                   />
                 </div>
               </div>
@@ -333,7 +333,7 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
                   min={500} max={20000} step={100}
                   value={[form.budget]}
                   onValueChange={(val) => setForm({ ...form, budget: Array.isArray(val) ? val[0] : val })}
-                  className="[&_[role=slider]]:bg-[--v-violet] [&_[role=slider]]:border-[--v-violet] [&_.bg-primary]:bg-[--v-violet]"
+                  className="[&_[role=slider]]:bg-[#0f0f0f] [&_[role=slider]]:border-[#0f0f0f] [&_.bg-primary]:bg-[#0f0f0f]"
                 />
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontFamily: "var(--v-font-mono)", fontSize: 9, letterSpacing: "0.08em", color: "var(--v-slate-2)", opacity: 0.5, textTransform: "uppercase" }}>
                   <span>Budget</span><span>Mid-range</span><span>Premium</span>
@@ -359,7 +359,7 @@ export default function TripForm({ defaultDestination = "" }: { defaultDestinati
                         display: "flex", alignItems: "center", gap: 8,
                         padding: "10px 14px", borderRadius: 12,
                         border: "1px solid",
-                        borderColor: isSelected ? `${vibe.color}60` : "rgba(124,92,255,0.15)",
+                        borderColor: isSelected ? `${vibe.color}60` : "rgba(0,0,0,0.1)",
                         background: isSelected ? `${vibe.color}12` : "rgba(255,255,255,0.4)",
                         color: isSelected ? vibe.color : "var(--v-slate-2)",
                         fontFamily: "var(--v-font-ui)", fontSize: 12, fontWeight: 500,

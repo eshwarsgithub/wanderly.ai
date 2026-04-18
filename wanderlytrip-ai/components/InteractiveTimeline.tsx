@@ -140,7 +140,7 @@ function DayCard({
                 <CalendarDays className="w-3 h-3" />
                 {!isNaN(date.getTime()) ? format(date, "EEE, MMM d") : `Day ${day.day}`}
               </span>
-              <span className="flex items-center gap-1 text-xs font-medium" style={{ color: "#00a896" }}>
+              <span className="flex items-center gap-1 text-xs font-medium" style={{ color: "#64748b" }}>
                 <DollarSign className="w-3 h-3" />
                 ${day.dailyCost}
               </span>

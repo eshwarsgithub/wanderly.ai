@@ -134,8 +134,8 @@ export default function NearbyPlaces({
               transition={{ delay: i * 0.04 }}
               className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50 transition-all group"
             >
-              <div className="w-8 h-8 rounded-lg bg-[#f0fdfb] flex items-center justify-center flex-shrink-0">
-                <MapPin className="w-4 h-4 text-[#00a896]" />
+              <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center flex-shrink-0">
+                <MapPin className="w-4 h-4 text-slate-500" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-[#0f172a] text-sm truncate">{place.name}</p>

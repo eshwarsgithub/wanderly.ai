@@ -99,8 +99,8 @@ export default function NearbyGems({ destination, onAddPlace }: NearbyGemsProps)
       >
         {/* Header */}
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-lg bg-[#f0fdfb] border border-[#99f6e4] flex items-center justify-center">
-            <Compass className="w-3.5 h-3.5 text-[#00a896]" />
+          <div className="w-6 h-6 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center">
+            <Compass className="w-3.5 h-3.5 text-slate-500" />
           </div>
           <span className="text-[#0f172a] font-semibold text-sm">Nearby Gems</span>
           <span className="text-slate-400 text-xs">· {dest}</span>
@@ -138,7 +138,7 @@ export default function NearbyGems({ destination, onAddPlace }: NearbyGemsProps)
                       className="absolute top-2 right-2 w-5 h-5 rounded-md flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 text-[10px] font-bold"
                       style={
                         isAdded
-                          ? { background: "#00a896", color: "#fff" }
+                          ? { background: "#64748b", color: "#fff" }
                           : { background: "#f1f5f9", color: "#64748b" }
                       }
                       title={isAdded ? "Added" : "Add to itinerary"}

@@ -116,11 +116,11 @@ function NearbyTabContent({
               onClick={() => selectActivity(activity)}
               className="w-full flex items-center gap-2 p-2.5 rounded-xl text-left transition-all"
               style={{
-                background: selectedActivity?.id === activity.id ? "#f0fdfb" : "transparent",
-                border: `1px solid ${selectedActivity?.id === activity.id ? "#99f6e4" : "transparent"}`,
+                background: selectedActivity?.id === activity.id ? "#f8fafc" : "transparent",
+                border: `1px solid ${selectedActivity?.id === activity.id ? "#e2e8f0" : "transparent"}`,
               }}
             >
-              <MapPin className="w-3.5 h-3.5 text-[#00a896] flex-shrink-0" />
+              <MapPin className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
               <span className="text-sm font-medium text-[#0f172a] flex-1 min-w-0 truncate">
                 {activity.name}
               </span>
@@ -133,7 +133,7 @@ function NearbyTabContent({
       {/* Nearby places panel */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5">
         <h3 className="text-[#0f172a] font-semibold text-sm mb-4 flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-[#00a896]" />
+          <MapPin className="w-4 h-4 text-slate-500" />
           Nearby Places
         </h3>
         {geocoding ? (
@@ -325,7 +325,7 @@ export default function TripDashboard() {
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-            style={{ width: 40, height: 40, borderRadius: 999, border: "2px solid rgba(124,92,255,0.2)", borderTopColor: "var(--v-violet)" }}
+            style={{ width: 40, height: 40, borderRadius: 999, border: "2px solid rgba(0,0,0,0.1)", borderTopColor: "#0f0f0f" }}
           />
           <p style={{ fontFamily: "var(--v-font-mono)", fontSize: 11, letterSpacing: "0.1em", color: "var(--v-slate-2)", textTransform: "uppercase" }}>Loading your journey…</p>
         </div>
@@ -501,7 +501,7 @@ export default function TripDashboard() {
               <div className="space-y-4">
                 <div className="bg-white rounded-2xl border border-slate-200 p-6">
                   <h3 className="text-[#0f172a] font-semibold text-base mb-4 flex items-center gap-2">
-                    <Package className="w-4 h-4 text-[#00a896]" />
+                    <Package className="w-4 h-4 text-slate-500" />
                     Packing Tips
                   </h3>
                   <ul className="space-y-3">
@@ -513,8 +513,8 @@ export default function TripDashboard() {
                         transition={{ delay: i * 0.08 }}
                         className="flex items-start gap-3 text-slate-600 text-sm"
                       >
-                        <div className="w-5 h-5 rounded-full bg-[#f0fdfb] border border-[#99f6e4] flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-[#00a896] text-xs font-bold">{i + 1}</span>
+                        <div className="w-5 h-5 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-slate-500 text-xs font-bold">{i + 1}</span>
                         </div>
                         {tip}
                       </motion.li>
@@ -523,7 +523,7 @@ export default function TripDashboard() {
                 </div>
                 <div className="bg-white rounded-2xl border border-slate-200 p-6">
                   <h3 className="text-[#0f172a] font-semibold text-base mb-4 flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-[#00a896]" />
+                    <Globe className="w-4 h-4 text-slate-500" />
                     Local Customs
                   </h3>
                   <ul className="space-y-3">
@@ -584,8 +584,8 @@ export default function TripDashboard() {
                 ].map(({ label, href, icon: Icon }) => (
                   <Link key={label} href={href}>
                     <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                      <div className="w-8 h-8 rounded-lg bg-[#f0fdfb] flex items-center justify-center">
-                        <Icon className="w-4 h-4 text-[#00a896]" />
+                      <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center">
+                        <Icon className="w-4 h-4 text-slate-500" />
                       </div>
                       <span className="text-slate-600 text-sm">{label}</span>
                     </div>
@@ -595,8 +595,8 @@ export default function TripDashboard() {
                 {/* Travel Guide link */}
                 <Link href={`/guide/${encodeURIComponent(itinerary.destination)}`}>
                   <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                    <div className="w-8 h-8 rounded-lg bg-[#f0fdfb] flex items-center justify-center">
-                      <BookOpen className="w-4 h-4 text-[#00a896]" />
+                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center">
+                      <BookOpen className="w-4 h-4 text-slate-500" />
                     </div>
                     <span className="text-slate-600 text-sm">Travel Guide</span>
                   </div>
@@ -607,8 +607,8 @@ export default function TripDashboard() {
                   disabled={shareState === "sharing"}
                   className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[#f0fdfb] flex items-center justify-center">
-                    <Share2 className="w-4 h-4 text-[#00a896]" />
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center">
+                    <Share2 className="w-4 h-4 text-slate-500" />
                   </div>
                   <span className="text-slate-600 text-sm">
                     {shareState === "sharing" ? "Generating link…" : shareState === "copied" ? "Link copied!" : "Share Trip"}
@@ -620,8 +620,8 @@ export default function TripDashboard() {
                   disabled={isExportingPdf}
                   className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[#f0fdfb] flex items-center justify-center">
-                    <Download className="w-4 h-4 text-[#00a896]" />
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center">
+                    <Download className="w-4 h-4 text-slate-500" />
                   </div>
                   <span className="text-slate-600 text-sm">
                     {isExportingPdf ? "Exporting…" : "Export PDF"}
@@ -633,8 +633,8 @@ export default function TripDashboard() {
                   onClick={() => setShowTripCard(true)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[#f0fdfb] flex items-center justify-center">
-                    <Copy className="w-4 h-4 text-[#00a896]" />
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center">
+                    <Copy className="w-4 h-4 text-slate-500" />
                   </div>
                   <span className="text-slate-600 text-sm">Trip Card</span>
                 </button>
